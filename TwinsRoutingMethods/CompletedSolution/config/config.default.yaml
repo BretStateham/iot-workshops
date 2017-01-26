@@ -1,0 +1,10 @@
+AzureIoTHubConfig:
+  Hostname: 
+  ConnectionString: 
+DeviceConfigs:
+- DeviceId: DeviceId
+  Key: 
+  Status: Enabled
+AzureServiceBusConfig:
+  ConnectionString: 
+  QueueName:

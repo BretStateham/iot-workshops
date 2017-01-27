@@ -80,6 +80,7 @@ namespace Core
     /// </summary>
     public class DeviceConfig
     {
+
         /// <summary>
         /// Gets or sets the device identifier.
         /// </summary>

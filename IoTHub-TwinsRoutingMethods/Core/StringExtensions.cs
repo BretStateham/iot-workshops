@@ -37,10 +37,23 @@ namespace Core
                 }
                 return new Tuple<bool, Exception>(true, null);
 
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 return new Tuple<bool, Exception>(false, e);
             }
+        }
+
+        /// <summary>
+        /// Logs a colerized message to the console window.
+        /// </summary>
+        /// <param name="color">The color.</param>
+        /// <param name="message">The message.</param>
+        public static void LogMessage(this string message, ConsoleColor color)
+        {
+            Console.ForegroundColor = color;
+            Console.WriteLine(message);
+            Console.ForegroundColor = ConsoleColor.White;
         }
     }
 }

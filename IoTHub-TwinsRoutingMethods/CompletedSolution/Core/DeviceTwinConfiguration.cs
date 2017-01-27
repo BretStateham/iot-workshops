@@ -17,17 +17,4 @@ namespace Core
             MessageSendDelay = messageSendDelay;
         }
     }
-
-    public class ReportedDeviceTwinConfiguration
-    {
-        public string ConfigId { get; set; }
-        public DateTime PropertyLastUpdateReceived { get; set; }
-        public string DesiredMessageSendDelay { get; set; }
-        public ReportedDeviceTwinConfiguration(string configId, string desiredMessageSendDelay, DateTime propertyLastUpdateReceived)
-        {
-            ConfigId = configId;
-            desiredMessageSendDelay = DesiredMessageSendDelay;
-            PropertyLastUpdateReceived = propertyLastUpdateReceived;
-        }
-    }
 }

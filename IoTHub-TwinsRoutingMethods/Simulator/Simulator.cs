@@ -10,20 +10,19 @@ using Microsoft.Azure.Devices.Shared;
 using Newtonsoft.Json;
 using TransportType = Microsoft.Azure.Devices.Client.TransportType;
 using Type = Core.Type;
-
 namespace Simulator
 {
-    internal class Simulator
+    class Simulator
     {
         private const int DefaultDelay = 5000;
         private static DeviceClient _deviceClient;
         private static DesiredDeviceTwinConfiguration _twinDesiredProperties;
-        private static volatile int _messageSendDelay = DefaultDelay;
+        private static int _messageSendDelay = DefaultDelay;
 
         private static readonly object Locker = new object();
         private static Status _propertyChangeStatus = Status.Accepted;
 
-        public static void Main(string[] args)
+        static void Main(string[] args)
         {
             const string configFilePath = @"../../../config/config.yaml";
             var config = configFilePath.GetIoTConfiguration();
@@ -39,18 +38,18 @@ namespace Simulator
 
             // execute initial connect synchronously
             Task.Run(async () =>
-                    {
-                        await Connect(_deviceClient);
-                        await GetInitialDesiredConfiguration(_deviceClient);
+            {
+                await Connect(_deviceClient);
+                await GetInitialDesiredConfiguration(_deviceClient);
 
-                        // Add Callback for Desired Configuration changes.
-                        await _deviceClient.SetDesiredPropertyUpdateCallback(OnDesiredPropertyChange, null);
+                // Add Callback for Desired Configuration changes.
+                await _deviceClient.SetDesiredPropertyUpdateCallback(OnDesiredPropertyChange, null);
 
-                        // Add Handler to set property request 
-                        _deviceClient.SetMethodHandler("AcceptDesiredProperties", OnAcceptDesiredProperty, null);
-                    }
-                    , cts.Token)
-                .Wait(cts.Token);
+                // Add Handler to set property request 
+                _deviceClient.SetMethodHandler("AcceptDesiredProperties", OnAcceptDesiredProperty, null);
+            }
+            , cts.Token)
+            .Wait(cts.Token);
 
             Task.Run(() => DataSend(_deviceClient, cts.Token), cts.Token);
 
@@ -72,15 +71,16 @@ namespace Simulator
                 var message = new Message(Encoding.ASCII.GetBytes(payload));
                 message.Properties.Add(MessageProperty.Severity.ToString("G"), Severity.Information.ToString("G"));
 
+                // Send the paylod to IoT Hub.
                 await deviceClient.SendEventAsync(message);
 
-                // Pause before next simulated device reading.
-                // We'll accept dirty reads of the delay value for simplicity.
+                // lock for safe read of _messageSendDelay.
                 int delay;
                 lock (Locker)
                 {
                     delay = _messageSendDelay;
                 }
+                // Pause before next simulated device reading.
                 await Task.Delay(delay, cancellationToken);
             }
         }
@@ -151,7 +151,6 @@ namespace Simulator
                     message.Properties.Add(MessageProperty.Severity.ToString("G"), Severity.Critical.ToString("G"));
                 }
 
-
                 await _deviceClient.SendEventAsync(message);
             }
         }
@@ -162,29 +161,34 @@ namespace Simulator
 
             if (Monitor.TryEnter(Locker) && (_propertyChangeStatus == Status.Pending))
             {
-                $"Updating message send delay from {_messageSendDelay} to {_twinDesiredProperties.MessageSendDelay}. Change will take effect immediatly."
-                .LogMessage(ConsoleColor.Green);
-
-                _messageSendDelay = int.Parse(_twinDesiredProperties.MessageSendDelay);
-                _propertyChangeStatus = Status.Accepted;
-                var responseMessage = new
+                try
                 {
-                    AcceptanceRequestDateTime = DateTime.UtcNow,
-                    Status = _propertyChangeStatus.ToString("G"),
-                    Message = "'MessageSendDelay' change accepted by device"
-                };
-                response = new MethodResponse(
-                    Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(responseMessage)),
-                    (int) HttpStatusCode.OK);
+                    $"Updating message send delay from {_messageSendDelay} to {_twinDesiredProperties.MessageSendDelay}. Change will take effect immediatly."
+                        .LogMessage(ConsoleColor.Green);
 
-                Monitor.Exit(Locker);
+                    _messageSendDelay = int.Parse(_twinDesiredProperties.MessageSendDelay);
+                    _propertyChangeStatus = Status.Accepted;
+                    var responseMessage = new
+                    {
+                        AcceptanceRequestDateTime = DateTime.UtcNow,
+                        Status = _propertyChangeStatus,
+                        Message = "'MessageSendDelay' change accepted by device"
+                    };
+                    response = new MethodResponse(
+                        Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(responseMessage)),
+                        (int) HttpStatusCode.OK);
+                }
+                finally
+                {
+                    Monitor.Exit(Locker);
+                }
             }
             else
             {
-                // Note: Precondition failed status code should really only be used with precondition header.
+                // Note: Locked status code should really only be used with precondition header.
                 // but direct methods do not allow access to headers to check precondition assertions.
 
-                const int httpPreconditionFailedStatusCode = 412;
+                const int httpLockedStatusCode = 423;
 
                 var lockedResponseMessage = new
                 {
@@ -195,7 +199,7 @@ namespace Simulator
 
                 response = new MethodResponse(
                     Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(lockedResponseMessage)),
-                    httpPreconditionFailedStatusCode
+                    httpLockedStatusCode
                 );
             }
             return

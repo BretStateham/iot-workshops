@@ -5,7 +5,7 @@
 In this workshop you will explore Azure IoT Hub's Device Twin, Direct Methods
 and Routing capabilities.  All three features will be exercised through the 
 implementation  of a Device Simulator and a Service Application. The complete
-solution has been provided in the repository's [Completed Solution](IoTHub-TwinsRoutingMethods/CompletedSolution)
+solution has been provided in the repository's [Completed Solution](CompletedSolution/)
 folder, in the event that you need a reference.
 
 ### Use Case 

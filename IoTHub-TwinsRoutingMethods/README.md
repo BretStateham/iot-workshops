@@ -5,7 +5,7 @@
 In this workshop you will explore Azure IoT Hub's Device Twin, Direct Methods
 and Routing capabilities.  All three features will be exercised through the 
 implementation  of a Device Simulator and a Service Application. The complete
-solution has been provided in the repository's [Completed Solution](/CompletedSolution)
+solution has been provided in the repository's [Completed Solution](IoTHub-TwinsRoutingMethods/CompletedSolution)
 folder, in the event that you need a reference.
 
 ### Use Case 
@@ -61,8 +61,9 @@ minutes.)
 - [Create Critical Notification Monitor](#create-critical-notification-monitor)
 - [Add Direct Method to Activate Requested Change](#add-direct-method-to-activate-requested-change)
 - [Run Solution](#run-solution)
-- [Extra Credit - Twin Reported Configuration](#extra-credit-1)
-- [Extra Credit - Push notifications with Flow](#extra-credit-2)
+- [Extra Credit - Twin Reported Configuration](#extra-credit-1---twin-reported-configuration)
+- [Extra Credit - Push notifications with Flow](#extra-credit-2---push-notifications-with-flow)
+
 
 ## Solution Setup
 

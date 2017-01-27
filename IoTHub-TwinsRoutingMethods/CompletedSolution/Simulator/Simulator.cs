@@ -18,7 +18,7 @@ namespace Simulator
         private const int DefaultDelay = 5000;
         private static DeviceClient _deviceClient;
         private static DesiredDeviceTwinConfiguration _twinDesiredProperties;
-        private static int _messageSendDelay = DefaultDelay;
+        private static volatile int _messageSendDelay = DefaultDelay;
 
         private static readonly object Locker = new object();
         private static Status _propertyChangeStatus = Status.Accepted;
@@ -42,19 +42,24 @@ namespace Simulator
                     {
                         await Connect(_deviceClient);
                         await GetInitialDesiredConfiguration(_deviceClient);
-                        await ConfigureDeviceClientHandlers(_deviceClient);
+
+                        // Add Callback for Desired Configuration changes.
+                        await _deviceClient.SetDesiredPropertyUpdateCallback(OnDesiredPropertyChange, null);
+
+                        // Add Handler to set property request 
+                        _deviceClient.SetMethodHandler("AcceptDesiredProperties", OnAcceptDesiredProperty, null);
                     }
                     , cts.Token)
                 .Wait(cts.Token);
 
-            Task.Run(() => DataSend(_deviceClient, ref _messageSendDelay, cts.Token), cts.Token);
+            Task.Run(() => DataSend(_deviceClient, cts.Token), cts.Token);
 
             Console.WriteLine("Press any key to exit.");
             Console.ReadLine();
             cts.Cancel();
         }
 
-        private static async Task DataSend(DeviceClient deviceClient, ref int messageSendDelay, CancellationToken cancellationToken)
+        private static async Task DataSend(DeviceClient deviceClient, CancellationToken cancellationToken)
         {
             while (true)
             {
@@ -62,7 +67,7 @@ namespace Simulator
 
                 var payload = Guid.NewGuid().ToString();
 
-                Console.WriteLine($"{DateTime.Now:HH:mm:ss tt} - Sending Data: {payload}");
+                $"{DateTime.Now:HH:mm:ss tt} - Sending Data: {payload}".LogMessage(ConsoleColor.White);
 
                 var message = new Message(Encoding.ASCII.GetBytes(payload));
                 message.Properties.Add(MessageProperty.Severity.ToString("G"), Severity.Information.ToString("G"));
@@ -70,7 +75,13 @@ namespace Simulator
                 await deviceClient.SendEventAsync(message);
 
                 // Pause before next simulated device reading.
-                await Task.Delay(messageSendDelay, cancellationToken);
+                // We'll accept dirty reads of the delay value for simplicity.
+                int delay;
+                lock (Locker)
+                {
+                    delay = _messageSendDelay;
+                }
+                await Task.Delay(delay, cancellationToken);
             }
         }
 
@@ -95,19 +106,12 @@ namespace Simulator
                     twin.Properties.Desired["deviceTwinConfig"].ToString());
         }
 
-        private static async Task ConfigureDeviceClientHandlers(DeviceClient deviceClient)
-        {
-            // Add Callback for property change requests
-            await deviceClient.SetDesiredPropertyUpdateCallback(OnDesiredPropertyChanged, null);
-
-            // Add Handler to set property request 
-            deviceClient.SetMethodHandler("AcceptDesiredProperties", OnAcceptDesiredProperty, null);
-        }
-
-        private static async Task OnDesiredPropertyChanged(TwinCollection desiredproperties, object usercontext)
+        private static async Task OnDesiredPropertyChange(TwinCollection desiredproperties, object usercontext)
         {
             if (desiredproperties.Contains("deviceTwinConfig"))
             {
+                Message message;
+
                 var deviceTwinConfig =
                     JsonConvert.DeserializeObject<DesiredDeviceTwinConfiguration>(
                         desiredproperties["deviceTwinConfig"].ToString());
@@ -115,7 +119,6 @@ namespace Simulator
                 // ignore delay for now. Just want to see if it can be parsed.
                 int delay;
 
-                Message message;
                 if (int.TryParse(deviceTwinConfig.MessageSendDelay, out delay))
                 {
                     lock (Locker)
@@ -135,8 +138,10 @@ namespace Simulator
                 else
                 {
                     _propertyChangeStatus = Status.Rejected;
-                    Console.WriteLine(
-                        $"Device Twin Property `messageSendDelay` is set to an illegal value: `{deviceTwinConfig.MessageSendDelay}`, change status is 'rejected'. Sending Critical Notification.");
+
+                    ($"Device Twin Property `messageSendDelay` is set to an illegal value: `{deviceTwinConfig.MessageSendDelay}`, " +
+                        $"change status is 'rejected'. Sending Critical Notification.").LogMessage(ConsoleColor.Red);
+
                     message = new Message(
                         Encoding.ASCII.GetBytes(
                             $"Parameter messageSendDelay value: `{deviceTwinConfig.MessageSendDelay}`, could not be converted to an Int."));
@@ -148,69 +153,48 @@ namespace Simulator
 
 
                 await _deviceClient.SendEventAsync(message);
-                // confirm receipt of desired configuration by writing value to reported.
-                var reportedProperties = new TwinCollection
-                {
-                    ["deviceTwinConfig"] = JsonConvert.SerializeObject(
-                        new ReportedDeviceTwinConfiguration(
-                            Guid.NewGuid().ToString(),
-                            deviceTwinConfig.MessageSendDelay,
-                            DateTime.UtcNow
-                        ))
-                };
-
-
-                await _deviceClient.UpdateReportedPropertiesAsync(reportedProperties);
             }
         }
 
         private static Task<MethodResponse> OnAcceptDesiredProperty(MethodRequest request, object context)
         {
             MethodResponse response;
-            Console.WriteLine($"Updating message send delay from {_messageSendDelay} to {_twinDesiredProperties.MessageSendDelay}. Change will take effect immediatly.");
 
-            if (Monitor.TryEnter(Locker))
+            if (Monitor.TryEnter(Locker) && (_propertyChangeStatus == Status.Pending))
             {
-                switch (_propertyChangeStatus)
-                {
-                    case Status.Pending:
+                $"Updating message send delay from {_messageSendDelay} to {_twinDesiredProperties.MessageSendDelay}. Change will take effect immediatly."
+                .LogMessage(ConsoleColor.Green);
 
-                        _messageSendDelay = int.Parse(_twinDesiredProperties.MessageSendDelay);
-                        _propertyChangeStatus = Status.Accepted;
-                        var responseMessage = new
-                        {
-                            AcceptanceRequestDateTime = DateTime.UtcNow,
-                            Status = _propertyChangeStatus,
-                            Message = "'MessageSendDelay' change accepted by device"
-                        };
-                        response = new MethodResponse(
-                            Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(responseMessage)),
-                            (int) HttpStatusCode.OK);
-                        break;
-                    case Status.Rejected:
-                    case Status.Accepted:
-                    case Status.Locked:
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
+                _messageSendDelay = int.Parse(_twinDesiredProperties.MessageSendDelay);
+                _propertyChangeStatus = Status.Accepted;
+                var responseMessage = new
+                {
+                    AcceptanceRequestDateTime = DateTime.UtcNow,
+                    Status = _propertyChangeStatus,
+                    Message = "'MessageSendDelay' change accepted by device"
+                };
+                response = new MethodResponse(
+                    Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(responseMessage)),
+                    (int) HttpStatusCode.OK);
+            
             }
             else
             {
-                // Note: Locked status code should really only be used with precondition header.
+                // Note: Precondition failed status code should really only be used with precondition header.
                 // but direct methods do not allow access to headers to check precondition assertions.
 
-                const int httpLockedStatusCode = 423;
+                const int httpPreconditionFailedStatusCode = 412;
 
                 var lockedResponseMessage = new
                 {
                     AcceptanceRequestDateTime = DateTime.UtcNow,
-                    Status = Status.Locked,
-                    Message = ""
+                    Status = "PreconditionFailed",
+                    Message = "A precondition for acceptance of the desired configuration change, failed."
                 };
 
                 response = new MethodResponse(
                     Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(lockedResponseMessage)),
-                    httpLockedStatusCode
+                    httpPreconditionFailedStatusCode
                 );
             }
             return

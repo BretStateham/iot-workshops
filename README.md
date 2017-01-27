@@ -6,7 +6,7 @@ repository welcomes additions, suggestions and bug fixes from the community, ple
 see the [Contributing](#contributing) section for details.  
 
 ## Workshops
-* [Twins Routing & Direct Methods](/TwinsRoutingMethods/README.md) - Advanced IoT workshop 
+* [IoT Hub - Twins, Routing & Direct Methods](/IoTHub-TwinsRoutingMethods/README.md) - Advanced IoT workshop 
 that explores the use of Azure IoT Hub's Device Twins, Routing and Direct Methods 
 
 ## Contributing

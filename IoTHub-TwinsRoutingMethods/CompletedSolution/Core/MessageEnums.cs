@@ -30,7 +30,7 @@ namespace Core
         Pending,
         Rejected,
         Accepted,
-        Locked
+        PreconditionFailed
     }
 
     public enum DeviceMethods

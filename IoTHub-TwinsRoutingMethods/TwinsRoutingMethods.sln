@@ -15,7 +15,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "config", "config", "{74DAB3
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Simulator", "Simulator\Simulator.csproj", "{372024F2-858D-4892-9601-E8CC41CD8A11}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Service", "Service\Service.csproj", "{CAFA4DF7-D0C3-44D2-A121-B070F8E7D429}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Service", "Service\Service.csproj", "{69F3682E-98C5-4CB9-81D4-E3335AD4EC04}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,10 +35,10 @@ Global
 		{372024F2-858D-4892-9601-E8CC41CD8A11}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{372024F2-858D-4892-9601-E8CC41CD8A11}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{372024F2-858D-4892-9601-E8CC41CD8A11}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CAFA4DF7-D0C3-44D2-A121-B070F8E7D429}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CAFA4DF7-D0C3-44D2-A121-B070F8E7D429}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CAFA4DF7-D0C3-44D2-A121-B070F8E7D429}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CAFA4DF7-D0C3-44D2-A121-B070F8E7D429}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69F3682E-98C5-4CB9-81D4-E3335AD4EC04}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69F3682E-98C5-4CB9-81D4-E3335AD4EC04}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69F3682E-98C5-4CB9-81D4-E3335AD4EC04}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69F3682E-98C5-4CB9-81D4-E3335AD4EC04}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

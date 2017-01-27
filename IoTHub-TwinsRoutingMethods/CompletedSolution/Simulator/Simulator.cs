@@ -181,7 +181,7 @@ namespace Simulator
             }
             else
             {
-                // Note: Precondition failed status code should really only be used with precondition header.
+                // Note: Precondition failed status code should really only be used with precondition header;
                 // but direct methods do not allow access to headers to check precondition assertions.
 
                 const int httpPreconditionFailedStatusCode = 412;

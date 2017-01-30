@@ -10,9 +10,10 @@ The complete solution has been provided in the repository's
 need a reference. 
  
 ## Index 
-- [Scenerio](#scenerio)
+- [Scenario](#scenario)
   - [Example Work Flow](#example-work-flow)
   - [Technologies](#technologies)
+  - [Termonology](#terminology)
   - [Prerequisites](#prerequisites)
   - [Extra Credit](#extra-credit)
 - [Solution Setup](#solution-setup) 
@@ -33,7 +34,7 @@ need a reference.
 - [Extra Credit - Twin Reported Configuration](#extra-credit-1---twin-reported-configuration) 
 - [Extra Credit - Push notifications with Flow](#extra-credit-2---push-notifications-with-flow) 
  
-## Scenerio  
+## Scenario  
 
 The primary role of the *Internet of Things* is to help us facilitate a deeper 
 understanding of, and to potentially augment, the world around us.  IoT architectures 
@@ -45,11 +46,11 @@ communication (device to data collection system only).  These systems typically 
 low cost devices that are easy to deploy and easy to discard or abandon.  In these solutions 
 the hardware typically requires considerable upfront planning and engineering to keep 
 operation costs in check, the net result being an ROI that is often easier to calculate.  
-Additionally, these systems tend to be time series or event drivent, making data 
+Additionally, these systems tend to be time series or event driven, making data 
 persistence a top priority. 
 
 Conversely, systems that leverage bidirectional communication require more expensive 
-hardware that naturally has more capabilites.  The system complexity is then shifted 
+hardware that naturally has more capabilities.  The system complexity is then shifted 
 toward the application layer where business logic can be implemented and deployed 
 dynamically.  With fungible/adaptable software in play, solutions can realize additional 
 ROI as the business deepens its operational understanding of the deployed system.  Where 
@@ -60,18 +61,18 @@ In this workshop, we will be implementing a SCADA or Supervisory Control and
 Data Acquisition system, leveraging *Azure's IoT Hub*.  The architecture 
 of a SCADA system includes a centralized supervisory control system networked
 to a collection remote processing modules that execute process tasks and relay 
-environemntal information. 
+environmental information. 
 
 You will be building two applications, the *Simulator*, which will mimic an 
 IoT field device that has a flexible runtime, and the *Service*, which represents 
-a cloud based command and control supervisory application.  In this workshop you will 
+a cloud based command and control supervisory application.  In this workshop, you will 
 explore how:
 
 - [Device Twins](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-device-twins) 
 can be leveraged to pass configuration and state data bidirectionally between a 
 remote device and the cloud.
 - [IoT Hub Routes](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-endpoints#custom-routing-endpoints) 
-can facilitate the real time distibution of events to specific consumers and data processors.
+can facilitate the real time distribution of events to specific consumers and data processors.
 - [Direct Methods](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-direct-methods) 
 can be utilized to coordinate behavior changes in one or more remote devices by calling 
 specific methods in the remote device's code base.
@@ -101,12 +102,25 @@ device will then alter its reporting frequency.
     - [Routes](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-endpoints#custom-routing-endpoints)  
 - [Service Bus](https://azure.microsoft.com/en-us/services/service-bus/)
  
+### Terminology
+
+| Term  | Description |
+| :------------ | :------------ |
+| Simulator  | the application the represents a remote device  |
+| Service  | the application that controls the *Simulator*  |
+| Device Twin  | a cloud based projection of a device, facilitating bidirectional information flow  |
+| Direct Method  | a interface and execution mechanism for invoking methods on a remote device  |
+| Notification |  a message from the simulator to IoT Hub with information about configuration change requests |
+| Desired Configuration  | configuration in a Device Twin that the remote device should use  |
+| Reported Configuration  | the configuration in a Device Twin as reported by the remote device  |
+
+
 ### Prerequisites 
  
 To complete the workshop you will need the following: 
 - Microsoft Visual Studio 2015 
 - An active Azure Account. (If you do not have an account, you can create  
-a [free acocunt](http://azure.microsoft.com/pricing/free-trial/) in just a few  
+a [free account](http://azure.microsoft.com/pricing/free-trial/) in just a few  
 minutes.) 
  
 ### Extra Credit 
@@ -562,7 +576,7 @@ This method -
     - Gets the latest Device Twin information 
     - Defines a new `patch` object used to update the Device Twin 
     - Updates the Device Twin  
-    - Logs the current desired configuration to the console. 
+    - Logs the current *Desired Configuration* to the console. 
  
 3. Lastly, add the following line to the *default* case of the `consoleReadTask` task  
 in the *Main* method: 
@@ -574,9 +588,9 @@ break;
  
 ## Add Desired Property Change Handler 
  
-The next step is to have the Simulator monitor for change requests and stage them for application by  
-the Direct Method.  In this process, the device will send a notification to the IoT Hub indicating  
-whether or not validation of the configuration change request was successful. 
+The next step is to have the *Simulator* monitor for change requests and stage them for application by  
+the *Direct Method*.  In this process, the *Simulator* will send an event to the IoT Hub indicating  
+whether or not the configuration change request validation was successful. 
  
 1. Add the following method to *Simulator.cs*: 
  
@@ -607,11 +621,12 @@ private static async Task OnDesiredPropertyChange(TwinCollection desiredproperti
     } 
 } 
 ``` 
-This handler ensures checks that the Desired Configuration contains our `deviceTwinConfig` object  
-and sets up the validation for the requested configuration change. 
+This handler ensures that the (Desired Configuration* contains the `deviceTwinConfig` object  
+and sets up validation for the requested configuration change. 
  
-2. In the validation failure case, the `else` branch, of the above handler add the  
+2. In the validation failure case, the `else` branch of the above handler, add the  
 following code: 
+
 ```C# 
 _propertyChangeStatus = Status.Rejected; 
  
@@ -628,10 +643,10 @@ message.Properties.Add(MessageProperty.Severity.ToString("G"), Severity.Critical
 ``` 
  
 This code will set the `_propertyChangeStatus` to **Rejected** and create a new **Critical** notification  
-to be sent to the IoT Hub.  Since the message is flagged with the **Critical** property, the 
-*IoT Hub*'s routing will kick in and forward the message onto the *Service Bus*. 
+to be sent to the IoT Hub.  Since the message is flagged with the *Severity* property set to 
+**Critical**, the *IoT Hub*'s routing will kick in and forward the message onto the *Service Bus*. 
  
-3. In the validation success case, the `if` branch, of the `OnDesiredPropertyChange` handler,  
+3. In the validation *success* case, the `if` branch of the `OnDesiredPropertyChange` handler,  
 add the following code: 
  
 ```C# 
@@ -652,11 +667,11 @@ message.Properties.Add(MessageProperty.Severity.ToString("G"), Severity.Critical
  
 This code will lock our synchronizing object, update the *Simulator*'s fields and prepare a  
 critical *success* message to be sent to the IoT Hub.  As with the failure case, the **Critical** 
-message property will be processed by the IoT Hub's routing mechanism for forwarding onto the  
-*Service Bus*.  
+message property will be processed by the IoT Hub's routing mechanism, forwarding it onto the 
+Service Bus.  
  
-4. Lastly, register the `OnDesiredPropertyChange` callback handler in *Main*.  Add the following  
-line inside the initialization task, after `await Connect(_deviceClient);`: 
+4. Lastly, register the `OnDesiredPropertyChange` callback handler in *Main* by adding the following  
+line inside the initialization task, just after `await Connect(_deviceClient);`: 
  
 ```C# 
 // Add Callback for Desired Configuration changes. 
@@ -666,10 +681,11 @@ await _deviceClient.SetDesiredPropertyUpdateCallback(OnDesiredPropertyChange, nu
  
 ## Create Critical Notification Monitor 
  
-With messages marked as **critical** flowing to the the custom *IoT Hub Route*, and onto the  
-Service Bus, we now need to write a Service app handler to process them.  The handler will process the  
-Service Bus messages based on the Status of the and for one's where the desired configuration  
-validation succeeded, we'll call a Direct Method on the device to accept the change, making it permanent.  
+With messages marked as **Critical** flowing to the the custom *IoT Hub Route*, and onto the  
+Service Bus, we now need to write a Service application handler to process them.  The 
+handler will process Service Bus messages based on their *Status*.  For messages where 
+the desired configuration value validation succeeded, the code will invoke a 
+*Direct Method* on the device, making the configuration change permanent.  
  
 1.  Add the following code to the *Service* class: 
  
@@ -692,8 +708,8 @@ private static void CriticalNotificationMonitor(
 } 
 ``` 
 The method configures a *Service Bus* client and defines a callback, the lambda in `Onmessage`. 
-Additionally, it creates a Service Client that will be used to call the Direct Method on the  
-device. 
+Additionally, it creates a Service Client that will be used to call the *Direct Method* 
+implemented in the *Simulator*. 
  
 2. In the body of the `OnMessage` call, add the following code: 
  
@@ -702,10 +718,14 @@ device.
                     typeof(Status),  
                     (string) message.Properties[MessageProperty.Status.ToString("G")]); 
 ```  
-While the code completion benefits of using `enum`s for state representation are helpful, crossing  
-domain boundaries with them can be cause for exceptionally verbose code, like the parse statement above. 
+Though the code completion benefits of using `enum`s for state representation 
+are helpful, crossing domain boundaries with them can be cause for exceptionally 
+verbose code, like the parse statement above.  Use this technique with caution; 
+for an alternate approach, check out the concept of 
+[Enumeration Classes](https://lostechies.com/jimmybogard/2008/08/12/enumeration-classes/). 
  
-3. Add a `switch` statement below `status` to process the various message status: 
+3. Add a `switch` statement below `var status ...` to process the various message 
+*Status* cases: 
  
 ```C# 
 switch (status) 
@@ -724,8 +744,8 @@ switch (status)
 We are primarily interested in messages that have a either **Pending** or **Rejected**  
 status; all others can simply result in an `ArgumentException`. 
  
-4. For desired configuration values that failed validation, **Rejected** case, we'll log them to  
-the console: 
+4. For desired configuration values that failed validation, **Rejected** case,
+simply log them to the console: 
  
 ```C# 
 var body = new StreamReader(message.GetBody<Stream>()).ReadToEnd(); 
@@ -751,8 +771,9 @@ $"Device responded with result code: {result.Status} and message: {result.GetPay
 break; 
 ``` 
  
-The code creates a new CloudToDeviceMethod to call the Direct Method handler bound to **AcceptDesiredProperties**.  
-It then uses the Service Client to invoke the Direct Method and reports the result. 
+The code creates a new `CloudToDeviceMethod` which is configured invoke the Direct Method 
+handler bound to **AcceptDesiredProperties**.  It then uses the ~Service Client` to 
+invoke the *Direct Method* and reports the result. 
  
 6. In the *Service* `Main` method, before the `consoleReadTask`, add the following code to bind the handler: 
  
@@ -762,10 +783,10 @@ CriticalNotificationMonitor(serviceBusConfig, azureConfig.ConnectionString, test
  
 ## Add Direct Method to Activate Requested Change 
  
-We need to now add, and wire up code that can answer calls to the *AcceptDesiredProperties* 
-Direct Method.  
+We need to now add, and wire up a method that can answer calls to the *AcceptDesiredProperties* 
+*Direct Method*.  
  
-1. Open the *Simulator* class and add the following method shell to the class: 
+1. Open the *Simulator* class and add the following method stub to the class: 
  
 ```C# 
 private static Task<MethodResponse> OnAcceptDesiredProperty(MethodRequest request, object context) 
@@ -788,15 +809,15 @@ private static Task<MethodResponse> OnAcceptDesiredProperty(MethodRequest reques
 This method defines a response object that well be sent back as the result of one of  
 the following cases: 
 - Lock object is available and the `_propertyChangeStatus` is set to **Pending**,  
-meaning that the change request can be accepted. 
+indicating that the configuration change request can be applied. 
 - Lock object is not available becuase a configuration change request is being executed  
 or the `_propertyChangeStatus` is set to any other value than **Pending**. 
  
 2. In the second case, the `else` branch, add the following code: 
  
 ```C# 
-// Note: Precondition failed status code should really only be used with precondition header; 
-// but direct methods do not allow access to headers to check precondition assertions. 
+// Note: Precondition failed status code should really only be used with precondition headers; 
+// but Direct Methods do not allow access to headers to check precondition assertions. 
  
 const int httpPreconditionFailedStatusCode = 412; 
  
@@ -813,13 +834,13 @@ response = new MethodResponse(
 ); 
 ``` 
  
-As noted in the comments, Direct Methods do not expose the original cloud side  
-http request headers for Direct Methods.  Typically, we would want the client,  
-the service app, to make an assertion about the required state of the server (Simulator)  
-as a precondition for fulfilment of the request. Despite not being able to leverage  
-a [Precondition header] typically associated with a 412 response, will use the  
-response code given the fundamental justification stands; the server's state was  
-unacceptable for successful processing of the request. 
+As noted in the comments, *Direct Methods* do not expose the original cloud side  
+http request headers.  Typically, we would want the client,  
+the Service application, to make an assertion about the required state of the server, 
+the Simulator, as a precondition for fulfilment of the request. Despite not being 
+able to leverage a *Precondition header* typically associated with a 412 response, 
+will use the *Precondition Failed* response code because the server's state was  
+technically unacceptable for successful processing of the request. 
  
 3. In the successful path, the `if` branch, add the following code: 
  
@@ -850,10 +871,16 @@ finally
 In this branch, we have acquired  a lock to safely modify both the `_propertyChangeStatus`  
 and `_messageSendDelay` fields.  Additionally we create a response message for relay  
 back to the client, indicating successful application of the desired property. Lastly,  
-we need to make sure to release the lock we aqacquired uired in the if statement.  
+we need to make sure to release the lock we acquired in the `if` statement.  
  
 3. Now, modify the initialization task in the *Simulator.cs* to register the  
-Direct Method handler.  The complete Task should look like the following: 
+*Direct Method* handler.  
+
+```C#
+ _deviceClient.SetMethodHandler("AcceptDesiredProperties", OnAcceptDesiredProperty, null);
+ ```
+
+The complete Task should look like the following: 
  
 ```C# 
 // execute initial connect synchronously 
@@ -878,8 +905,8 @@ Direct Method is called.
  
 ## Run Solution 
  
-- Right Click on the Solution in the Solution Explorer, Select **Set Startup Projects ...** 
-- Check **Multiple startup projects** and set *Service* and *Simulator* projects to **Start** 
+- Right Click on the Solution in the Visual Studio *Solution Explorer*, Select **Set Startup Projects ...** 
+- Check **Multiple startup projects** and set the *Service* and *Simulator* projects to **Start** 
 - Click **Apply** and **OK** 
 - Run the Solution  
 - Try entering new millisecond values at the prompt, or illegal values like 'moose'. 
@@ -905,12 +932,12 @@ HTTP status code equal to 200.
 ## Extra Credit 2 - Push notifications with Flow 
  
 - Add a second Service Bus Queue to split *Pending* and *Rejected* notifications  
-to discrete queues. 
-- Recreate the IoT Hub with a non-free pricing tier. 
-- Add a new endpoint and route to split *Pending* and *Rejected* notifications. 
+to discrete queues.
+- Recreate the IoT Hub with a **Basic** pricing tier. 
+- Add a new *Endpoint* and *Route* to split **Pending** and **Rejected** notifications. 
 - Modify the `CriticalNotificationMonitor` method of the Service project, adding  
-discrete `OnMessage` handlers for both *Pending* and *Rejected* queues. 
-- In the *Rejected* handler add code to post the following JSON object to a URL. 
+discrete `OnMessage` handlers for both **Pending** and **Rejected** queues. 
+- In the **Rejected** handler add code to post the following JSON object to a URL. 
 ```JAVASCRIPT  
 { 
     "Type":"ConfigChange", 
@@ -947,9 +974,9 @@ the same account used on your phone.
   ] 
 } 
 ``` 
-- Add a *New Step* 
-- Select *Send a push notifications*, enter "Received the following critical notification: ",  
-press *Add dynamic content* and Select `Message` to add the *Message* property of the JSON  
+- Add a **New Step** 
+- Select **Send a push notification**, enter "Received the following critical notification: ",  
+press **Add dynamic content** and Select `Message` to add the *Message* property of the JSON  
 object from the Request Body.   
 - Save the Flow, copy the generated URL in the *Request* step and use it in the *Rejected* 
 queue flow in the Service Application.  

@@ -4,48 +4,17 @@
  
 In this workshop you will explore Azure IoT Hub's Device Twin, Direct Methods 
 and Routing capabilities.  All three features will be exercised through the  
-implementation  of a Device Simulator and a Service Application. The complete 
-solution has been provided in the repository's [Completed Solution](CompletedSolution/) 
-folder, in the event that you need a reference. 
- 
-### Use Case  
- 
-The example work flow that will be implemented is as follows: 
-- The Service application will use values entered into it's Console to request  
-a change in the Simulator's data delivery rate.  This feature leverages the  
-IoT Hub's Device Twin functionality. 
-- The Simulator will listen for Device Twin Desired Configuration changes,  
-and perform validation on the requested configuration change value. 
-- The simulator will then send a message marked as **Critical** to the *IoT Hub*  
-indicating the success or failure of the validation step. 
-- On validation failure the Service application  will display a message to the  
-user. 
-- On validation success, the Service application will use a Direct Method to  
-instruct the Device to apply the desired configuration change permanently.  The  
-device will then alter its reporting frequency.  
- 
-### Extra Credit 
- 
-If you complete the workshop ahead of schedule, there are *Extra Credit*  
-exercises that will explore Device Twin Reported Configurations and the  
-integration of Push Notifications with Microsoft Flow.   
- 
- 
-### Technologies 
- 
-- [Device Twins](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-device-twins)  
-- [Direct Methods](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-direct-methods) 
-- [Routes](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-endpoints#custom-routing-endpoints)  
- 
-### Prerequisites 
- 
-To complete the workshop you will need the following: 
-- Microsoft Visual Studio 2015 
-- An active Azure Account. (If you do not have an account, you can create  
-a [free acocunt](http://azure.microsoft.com/pricing/free-trial/) in just a few  
-minutes.) 
+implementation of a simulated device and a mock cloud application. 
+The complete solution has been provided in the repository's 
+[Completed Solution](CompletedSolution/) folder, in the event that you 
+need a reference. 
  
 ## Index 
+- [Scenerio](#scenerio)
+  - [Example Work Flow](#example-work-flow)
+  - [Technologies](#technologies)
+  - [Prerequisites](#prerequisites)
+  - [Extra Credit](#extra-credit)
 - [Solution Setup](#solution-setup) 
   - [Simulator](#simulator) 
   - [Service Application](#service-application) 
@@ -64,6 +33,88 @@ minutes.)
 - [Extra Credit - Twin Reported Configuration](#extra-credit-1---twin-reported-configuration) 
 - [Extra Credit - Push notifications with Flow](#extra-credit-2---push-notifications-with-flow) 
  
+## Scenerio  
+
+The primary role of the *Internet of Things* is to help us facilitate a deeper 
+understanding of, and to potentially augment, the world around us.  IoT architectures 
+come in two flavors defined by communication styles and each presents challenges, 
+advantages and disadvantages. 
+
+In what is often thought of as the 'simple' case are solutions that leverage one-way 
+communication (device to data collection system only).  These systems typically leverage 
+low cost devices that are easy to deploy and easy to discard or abandon.  In these solutions 
+the hardware typically requires considerable upfront planning and engineering to keep 
+operation costs in check, the net result being an ROI that is often easier to calculate.  
+Additionally, these systems tend to be time series or event drivent, making data 
+persistence a top priority. 
+
+Conversely, systems that leverage bidirectional communication require more expensive 
+hardware that naturally has more capabilites.  The system complexity is then shifted 
+toward the application layer where business logic can be implemented and deployed 
+dynamically.  With fungible/adaptable software in play, solutions can realize additional 
+ROI as the business deepens its operational understanding of the deployed system.  Where 
+unidirectional systems focus on events, bidirectional systems are often resource driven, 
+leveraging client/server and interactivity paradigms.     
+
+In this workshop, we will be implementing a SCADA or Supervisory Control and 
+Data Acquisition system, leveraging *Azure's IoT Hub*.  The architecture 
+of a SCADA system includes a centralized supervisory control system networked
+to a collection remote processing modules that execute process tasks and relay 
+environemntal information. 
+
+You will be building two applications, the *Simulator*, which will mimic an 
+IoT field device that has a flexible runtime, and the *Service*, which represents 
+a cloud based command and control supervisory application.  In this workshop you will 
+explore how:
+
+- [Device Twins](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-device-twins) 
+can be leveraged to pass configuration and state data bidirectionally between a 
+remote device and the cloud.
+- [IoT Hub Routes](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-endpoints#custom-routing-endpoints) 
+can facilitate the real time distibution of events to specific consumers and data processors.
+- [Direct Methods](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-direct-methods) 
+can be utilized to coordinate behavior changes in one or more remote devices by calling 
+specific methods in the remote device's code base.
+    
+### Example Work Flow
+
+The example work flow that will be implemented is as follows: 
+
+- The Service application will leverage a *Device Twin* to pass values entered into its 
+Console onto the Twin's *Desired Configuration* projection.
+- The Simulator will listen for Device Twin Desired Configuration changes,  
+and perform validation on the requested configuration value. 
+- The Simulator will then send a message marked as **Critical** to the IoT Hub  
+indicating the success or failure of the validation step.  These messages will 
+be filtered and forwarded to an *Azure Service Bus* by using *Azure IoT Hub Routes*. 
+- The Service Application will subscribe to the Azure Service Bus and on validation 
+failure, it will display an error message to the user. 
+- On validation success, the Service application will use a *Direct Method* to  
+instruct the Device to apply the desired configuration change permanently.  The  
+device will then alter its reporting frequency.
+
+### Technologies 
+ 
+- [IoT Hub](https://azure.microsoft.com/en-us/services/iot-hub/) - used 
+    - [Device Twins](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-device-twins)  
+    - [Direct Methods](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-direct-methods) 
+    - [Routes](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-endpoints#custom-routing-endpoints)  
+- [Service Bus](https://azure.microsoft.com/en-us/services/service-bus/)
+ 
+### Prerequisites 
+ 
+To complete the workshop you will need the following: 
+- Microsoft Visual Studio 2015 
+- An active Azure Account. (If you do not have an account, you can create  
+a [free acocunt](http://azure.microsoft.com/pricing/free-trial/) in just a few  
+minutes.) 
+ 
+### Extra Credit 
+ 
+If you complete the workshop ahead of schedule, there are *Extra Credit*  
+exercises that will explore Device Twin Reported Configurations and the  
+integration of Push Notifications with Microsoft Flow.  
+
  
 ## Solution Setup 
  

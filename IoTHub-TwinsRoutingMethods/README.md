@@ -3,7 +3,7 @@
 ## Overview 
  
 In this workshop you will explore Azure IoT Hub's Device Twin, Direct Methods 
-and Routing capabilities.  All three features will be exercised through the  
+and Routing capabilities.  All three features will be exercised through the 
 implementation of a simulated device and a mock cloud application. 
 The complete solution has been provided in the repository's 
 [Completed Solution](CompletedSolution/) folder, in the event that you 
@@ -34,7 +34,7 @@ need a reference.
 - [Extra Credit - Twin Reported Configuration](#extra-credit-1---twin-reported-configuration) 
 - [Extra Credit - Push notifications with Flow](#extra-credit-2---push-notifications-with-flow) 
  
-## Scenario  
+## Scenario 
 
 The primary role of the *Internet of Things* is to help us facilitate a deeper 
 understanding of, and to potentially augment, the world around us.  IoT architectures 
@@ -45,7 +45,7 @@ In what is often thought of as the 'simple' case are solutions that leverage one
 communication (device to data collection system only).  These systems typically leverage 
 low cost devices that are easy to deploy and easy to discard or abandon.  In these solutions 
 the hardware typically requires considerable upfront planning and engineering to keep 
-operation costs in check, the net result being an ROI that is often easier to calculate.  
+operation costs in check, the net result being an ROI that is often easier to calculate. 
 Additionally, these systems tend to be time series or event driven, making data 
 persistence a top priority. 
 
@@ -55,7 +55,7 @@ toward the application layer where business logic can be implemented and deploye
 dynamically.  With fungible/adaptable software in play, solutions can realize additional 
 ROI as the business deepens its operational understanding of the deployed system.  Where 
 unidirectional systems focus on events, bidirectional systems are often resource driven, 
-leveraging client/server and interactivity paradigms.     
+leveraging client/server and interactivity paradigms.    
 
 In this workshop, we will be implementing a SCADA or Supervisory Control and 
 Data Acquisition system, leveraging *Azure's IoT Hub*.  The architecture 
@@ -76,30 +76,30 @@ can facilitate the real time distribution of events to specific consumers and da
 - [Direct Methods](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-direct-methods) 
 can be utilized to coordinate behavior changes in one or more remote devices by calling 
 specific methods in the remote device's code base.
-    
+   
 ### Example Work Flow
 
 The example work flow that will be implemented is as follows: 
 
 - The Service application will leverage a *Device Twin* to pass values entered into its 
 Console onto the Twin's *Desired Configuration* projection.
-- The Simulator will listen for Device Twin Desired Configuration changes,  
+- The Simulator will listen for Device Twin Desired Configuration changes, 
 and perform validation on the requested configuration value. 
-- The Simulator will then send a message marked as **Critical** to the IoT Hub  
+- The Simulator will then send a message marked as **Critical** to the IoT Hub 
 indicating the success or failure of the validation step.  These messages will 
 be filtered and forwarded to an *Azure Service Bus* by using *Azure IoT Hub Routes*. 
 - The Service Application will subscribe to the Azure Service Bus and on validation 
 failure, it will display an error message to the user. 
-- On validation success, the Service application will use a *Direct Method* to  
-instruct the Device to apply the desired configuration change permanently.  The  
+- On validation success, the Service application will use a *Direct Method* to 
+instruct the Device to apply the desired configuration change permanently.  The 
 device will then alter its reporting frequency.
 
 ### Technologies 
  
 - [IoT Hub](https://azure.microsoft.com/en-us/services/iot-hub/) - used 
-    - [Device Twins](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-device-twins)  
+    - [Device Twins](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-device-twins) 
     - [Direct Methods](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-direct-methods) 
-    - [Routes](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-endpoints#custom-routing-endpoints)  
+    - [Routes](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-endpoints#custom-routing-endpoints) 
 - [Service Bus](https://azure.microsoft.com/en-us/services/service-bus/)
  
 ### Terminology
@@ -119,90 +119,90 @@ device will then alter its reporting frequency.
  
 To complete the workshop you will need the following: 
 - Microsoft Visual Studio 2015 
-- An active Azure Account. (If you do not have an account, you can create  
-a [free account](http://azure.microsoft.com/pricing/free-trial/) in just a few  
+- An active Azure Account. (If you do not have an account, you can create 
+a [free account](http://azure.microsoft.com/pricing/free-trial/) in just a few 
 minutes.) 
  
 ### Extra Credit 
  
-If you complete the workshop ahead of schedule, there are *Extra Credit*  
-exercises that will explore Device Twin Reported Configurations and the  
-integration of Push Notifications with Microsoft Flow.  
+If you complete the workshop ahead of schedule, there are *Extra Credit* 
+exercises that will explore Device Twin Reported Configurations and the 
+integration of Push Notifications with Microsoft Flow. 
 
  
 ## Solution Setup 
  
 ### Simulator 
  
-1. Open the [TwinsRoutingMethods solution file](/TwinsRoutingMethods.sln) in Visual Studio.  
+1. Open the [TwinsRoutingMethods solution file](/TwinsRoutingMethods.sln) in Visual Studio. 
  
-2. Add a new project for for the Device Simulator. Click **File** > **Add** >  
-**New Project...**, Select **Visual C#** > **Windows** > **Console Application**,  
-in the *Name* box enter **Simulator**.  
+2. Add a new project for for the Device Simulator. Click **File** > **Add** > 
+**New Project...**, Select **Visual C#** > **Windows** > **Console Application**, 
+in the *Name* box enter **Simulator**. 
  
-3. Add a *Project Reference* to the included *Core* project. Right click on the project  
-in the *Solution Explorer*, and Select **Add** > **Reference**.  From the left nav,  
-select **Project** > **Solution**, and add the *Core* project.  
+3. Add a *Project Reference* to the included *Core* project. Right click on the project 
+in the *Solution Explorer*, and Select **Add** > **Reference**.  From the left nav, 
+select **Project** > **Solution**, and add the *Core* project. 
  
-4. Use Nuget to add **Microsoft.Azure.Devices.Client** package.  Right click on the  
-*Simulator* project, select **Manage Nuget Packages...**.  In the dialog, browse for  
+4. Use Nuget to add **Microsoft.Azure.Devices.Client** package.  Right click on the 
+*Simulator* project, select **Manage Nuget Packages...**.  In the dialog, browse for 
 the **Microsoft.Azure.Devices.Client** package, and install.  You may need to **Update** 
-several dependent packages after installation.  
-  
-### Service Application 
-  
-1. Add a new project for the Service Application. Click **File** > **Add** >  
-**New Project...**, Select **Visual C#** > **Windows** > **Console Application**,  
-in the *Name* box enter **Service**.  
-  
-2. Add a *Project Reference* to the included *Core* project. Right click on the project  
-in the *Solution Explorer*, and Select **Add** > **Reference**.  From the left nav,  
-select **Project** > **Solution**, and add the *Core* project.  
-  
-3. Use Nuget to add the **Microsoft.Azure.Devices.Client** and **WindowsAzure.ServiceBus**  
-packages.  Right click on the *Simulator* project, select **Manage Nuget Packages...**.   
-In the dialog, browse for both packages, and install.  You may need to **Update** several  
-dependent packages after installation.  
-  
-### Configuration  
+several dependent packages after installation. 
  
-1) Create a local config.yaml file.  In the *Solution Explorer*, open the *config* solution  
+### Service Application 
+ 
+1. Add a new project for the Service Application. Click **File** > **Add** > 
+**New Project...**, Select **Visual C#** > **Windows** > **Console Application**, 
+in the *Name* box enter **Service**. 
+ 
+2. Add a *Project Reference* to the included *Core* project. Right click on the project 
+in the *Solution Explorer*, and Select **Add** > **Reference**.  From the left nav, 
+select **Project** > **Solution**, and add the *Core* project. 
+ 
+3. Use Nuget to add the **Microsoft.Azure.Devices.Client** and **WindowsAzure.ServiceBus** 
+packages.  Right click on the *Simulator* project, select **Manage Nuget Packages...**.  
+In the dialog, browse for both packages, and install.  You may need to **Update** several 
+dependent packages after installation. 
+ 
+### Configuration 
+ 
+1) Create a local config.yaml file.  In the *Solution Explorer*, open the *config* solution 
 folder.  Copy and rename *config.default.yaml* -> *config.yaml*. 
  
 ## Creating an Azure Service Bus 
  
-1. Sign into the [Azure Portal](https://portal.azure.com/).  
+1. Sign into the [Azure Portal](https://portal.azure.com/). 
  
-2. In the Jumpbar, click **New** > **Enterprise Integration** > **Service Bus**  
+2. In the Jumpbar, click **New** > **Enterprise Integration** > **Service Bus** 
  
 3. In the *Service Bus* blade, configure your Service Bus, selecting the appropriate 
 pricing tier. 
  
-    - In the **Name** box, enter a name for your Service Bus. If the **Name** is valid and  
+    - In the **Name** box, enter a name for your Service Bus. If the **Name** is valid and 
     available, a green check mark appears in the **Name** box. 
-    - Select a [pricing and scale tier](https://azure.microsoft.com/en-us/pricing/details/service-bus/).  
+    - Select a [pricing and scale tier](https://azure.microsoft.com/en-us/pricing/details/service-bus/). 
     This tutorial does not require a specific tier.  For this workshop, use the Basic tier. 
-    - In **Resource Group**, either create a resource group, or select an existing one. For  
-    more information, see [Using resource groups to manage your Azure resources](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-portal).  
-    - In **Location**, select the location to host your Service Bus. For this workshop,  
-    choose your nearest location.  
+    - In **Resource Group**, either create a resource group, or select an existing one. For 
+    more information, see [Using resource groups to manage your Azure resources](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-portal). 
+    - In **Location**, select the location to host your Service Bus. For this workshop, 
+    choose your nearest location. 
  
-4. When you have chosen your Service Bus configuration options, click **Create**.  It can  
-take a few minutes for Azure to create your Service Bus.  To check the status you can monitor  
+4. When you have chosen your Service Bus configuration options, click **Create**.  It can 
+take a few minutes for Azure to create your Service Bus.  To check the status you can monitor 
 the process on the Startboard or in the Notification panel. 
  
 5. When the Service Bus has been successfully created, click the new tile for your Service Bus in the Azure 
 portal to open the blade for the new Service Bus. 
  
-6. In the **Shared access policies** blade, click the **Add** button and create a new  
-policy with the **Listener** claim.  Press **Create**.  After the claim has been created,  
-select the **Listener** claim, and in *Policy:Listener* blade the copy the  
-*CONNECTION STRING -PRIMARY KEY* value and paste it into the *config.yaml* file  
-of your solution under **AzureServiceBusConfig** > **ConnectionString**.  The connection  
-string should look like:  
+6. In the **Shared access policies** blade, click the **Add** button and create a new 
+policy with the **Listener** claim.  Press **Create**.  After the claim has been created, 
+select the **Listener** claim, and in *Policy:Listener* blade the copy the 
+*CONNECTION STRING -PRIMARY KEY* value and paste it into the *config.yaml* file 
+of your solution under **AzureServiceBusConfig** > **ConnectionString**.  The connection 
+string should look like: 
 `Endpoint=sb://{Service Bus Name}.servicebus.windows.net/;SharedAccessKeyName=Listener;SharedAccessKey={Shared Access Key}` 
  
-7. In the **Queues** blade, click the **Add** button and create a new queue for  
+7. In the **Queues** blade, click the **Add** button and create a new queue for 
 *critical-notifications*.  In the *Name* box, enter `critical-notifications` and press **Create**. 
  
 8. Back in the solution's *config.yaml* file, set the **AzureServiceBusConfig** > **QueueName** 
@@ -214,29 +214,29 @@ field to the same value (`critical-notifications`).
 1. In the Jumpbar, click **New** > **Internet of Things** > **IoT Hub**. 
  
 2. In the *IoT Hub* blade, configure your IoT Hub, selecting the appropriate pricing tier. 
-    - In the **Name** box, enter a name for your IoT HUb. If the **Name** is valid and  
+    - In the **Name** box, enter a name for your IoT HUb. If the **Name** is valid and 
     available, a green check mark appears in the **Name** box. 
-    - Select a [pricing and scale tier](https://azure.microsoft.com/en-us/pricing/details/iot-hub/).  
+    - Select a [pricing and scale tier](https://azure.microsoft.com/en-us/pricing/details/iot-hub/). 
     This tutorial does not require a specific tier.  For this workshop, use the Free tier. 
-    - In **Resource Group**, select the resource group created in the previous section. For  
-    more information, see [Using resource groups to manage your Azure resources](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-portal).  
-    - In **Location**, select the location to host your IoT Hub. For this workshop,  
-    choose the same location used in the previous section.  
+    - In **Resource Group**, select the resource group created in the previous section. For 
+    more information, see [Using resource groups to manage your Azure resources](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-portal). 
+    - In **Location**, select the location to host your IoT Hub. For this workshop, 
+    choose the same location used in the previous section. 
  
-3. When you have chosen your IoT Hub configurations options, click **Create**.  It can  
-take a few minutes for Azure to create your IoT Hub.  To check the status you can monitor  
+3. When you have chosen your IoT Hub configurations options, click **Create**.  It can 
+take a few minutes for Azure to create your IoT Hub.  To check the status you can monitor 
 the process on the Startboard or in the Notification panel. 
  
-4. When the IoT Hub has been successfully created, click the new tile for your IoT Hub in  
-the Azure portal to open the blade for the new IoT Hub.  
+4. When the IoT Hub has been successfully created, click the new tile for your IoT Hub in 
+the Azure portal to open the blade for the new IoT Hub. 
  
-5. Populate the solution's *config.yaml* file with required settings from the IoT Hub.  
+5. Populate the solution's *config.yaml* file with required settings from the IoT Hub. 
     - In the *Overview* blade, copy the **Hostname** value. 
     - In the solution's *config.yaml* file, paste the *Hostname* value into the **AzureIoTHubConfig** > 
     **Hostname** field.  The value shoud look like `{IoT Hub Name}.azure-devices.net`. 
-    - In the *Shared access policies* blade, select the *iothubowner* policy. Copy the *Connection string-primary key*.  
-    - In the solution's *config.yaml*, paste the connection string into the **AzureIoTHubConfig** >  
-    **ConnectionString** field.  The connection string should look like:  
+    - In the *Shared access policies* blade, select the *iothubowner* policy. Copy the *Connection string-primary key*. 
+    - In the solution's *config.yaml*, paste the connection string into the **AzureIoTHubConfig** > 
+    **ConnectionString** field.  The connection string should look like: 
     `HostName={Iot Hub Name}.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey={Shared Access Key}` 
  
 ### Add IoT Hub Endpoint 
@@ -257,7 +257,7 @@ the Azure portal to open the blade for the new IoT Hub.
  
 2. In the *Create new route* blade, configure the new route. 
     - In the *Name* box, enter a name for the new route. 
-    - In the *Data source* dropdown, select **Device Messages**.  
+    - In the *Data source* dropdown, select **Device Messages**. 
     - Set the *Endpoint* to the **critical-notifications* endpoint created above. 
     - Make sure the *Enable Rule* toggle is set to **On**. 
     - In the *Query string* box, enter `severity="critical"`. 
@@ -283,16 +283,16 @@ the Azure portal to open the blade for the new IoT Hub.
 2. Under the *DeviceConfigs* section of the YAML file, add a unique value for the *DeviceId* 
 field. 
  
-3. Run the CreateDeviceIdentity project. In the Solution Explorer, right click on the  
-*CreateDeviceIdentity* project and select**Set as Startup Project**.  Running the solution  
-will add a [Device Identity](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-csharp-csharp-getstarted#create-a-device-identity)  
-for the test Device to your IoT Hub.  The console application will automatically insert and  
+3. Run the CreateDeviceIdentity project. In the Solution Explorer, right click on the 
+*CreateDeviceIdentity* project and select**Set as Startup Project**.  Running the solution 
+will add a [Device Identity](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-csharp-csharp-getstarted#create-a-device-identity) 
+for the test Device to your IoT Hub.  The console application will automatically insert and 
 save the device key generated by your IoT Hub, to the solutions's *config.yaml* file. 
  
 ## Creating Device Simulator 
  
-1. Open the *Simulator* project, right click on the *Program.cs* file and select **Rename**.  
-Enter **Simulator.cs** at the prompt and allow Visual Studio to rename the class as well.   
+1. Open the *Simulator* project, right click on the *Program.cs* file and select **Rename**. 
+Enter **Simulator.cs** at the prompt and allow Visual Studio to rename the class as well.  
  
 2. Add the following `using` statements at the top: 
  
@@ -309,7 +309,7 @@ using Microsoft.Azure.Devices.Shared;
 using Newtonsoft.Json; 
 using TransportType = Microsoft.Azure.Devices.Client.TransportType; 
 using Type = Core.Type; 
-```  
+``` 
  
 3. Add the following code to the *Simulator* class: 
  
@@ -344,11 +344,11 @@ Console.ReadLine();
 cts.Cancel(); 
 ``` 
  
-This code parses the *config.yaml* file into local varaibles and adds a  
-Cancellation Token that will be used to gracefully exit tasks we'll build later.  
+This code parses the *config.yaml* file into local varaibles and adds a 
+Cancellation Token that will be used to gracefully exit tasks we'll build later. 
 Then, it creates a *Device Client* that will be used to interact with the IoT Hub. 
  
-5. Add the following method to the *Simulator* class that will initialized the device  
+5. Add the following method to the *Simulator* class that will initialized the device 
 clients connection to the IoT Hub: 
  
 ```C# 
@@ -366,7 +366,7 @@ private static async Task Connect(DeviceClient deviceClient)
 } 
 ``` 
  
-6. Add the following method to the *Simulator* class to initialize the local  
+6. Add the following method to the *Simulator* class to initialize the local 
 copy of the Device Twin Desired Configuration. 
  
 ```C# 
@@ -379,10 +379,10 @@ private static async Task GetInitialDesiredConfiguration(DeviceClient deviceClie
 } 
 ``` 
  
-Here we are deserializing the configuration to a type in the *Core* project to  
-make working with the Desired Configuration simpler and type safe.   
+Here we are deserializing the configuration to a type in the *Core* project to 
+make working with the Desired Configuration simpler and type safe.  
  
-7. Call the `Connect` and `GetInitialDesiredConfiguration` methods from `Main`  
+7. Call the `Connect` and `GetInitialDesiredConfiguration` methods from `Main` 
 just after the *deviceClient* is initialized as follows: 
  
 ```C# 
@@ -426,28 +426,28 @@ private static async Task DataSend(DeviceClient deviceClient, CancellationToken 
     } 
 } 
 ``` 
-This method runs a loop that will send a new GUID payload to the IoT Hub at  
-intervals specified by the `_messageSendDelay` field. We will leverage the  
+This method runs a loop that will send a new GUID payload to the IoT Hub at 
+intervals specified by the `_messageSendDelay` field. We will leverage the 
 lock to ensure a consistent read of the *_messageSendDelay* field. 
  
 *Note/Extra Credit:* passing a 
 `Func<int>` to retrieve the delay value on each loop would likely be prefereable 
-to enhance testability.  
+to enhance testability. 
  
-9. Call the `DataSend` method from `Main` just after the *Connect* task,  
-as follows:  
+9. Call the `DataSend` method from `Main` just after the *Connect* task, 
+as follows: 
  
-```C#  
+```C# 
 Task.Run(() => DataSend(_deviceClient, cts.Token), cts.Token); 
 ``` 
  
-The shell of the simulator application is now complete.  We'll be adding a few  
+The shell of the simulator application is now complete.  We'll be adding a few 
 callback and event handlers later in the tutorial. 
  
 ## Create Service Application 
  
-1. Open the *Service* project, right click on the *Program.cs* file and select **Rename**.  
-Enter **Service.cs** at the prompt and allow Visual Studio to rename the class as well.   
+1. Open the *Service* project, right click on the *Program.cs* file and select **Rename**. 
+Enter **Service.cs** at the prompt and allow Visual Studio to rename the class as well.  
  
 2. Add the following `using` statements at the top of the file: 
  
@@ -462,7 +462,7 @@ using Microsoft.Azure.Devices;
 using Microsoft.Azure.Devices.Common; 
 using Microsoft.ServiceBus.Messaging; 
 using Newtonsoft.Json; 
-```  
+``` 
  
 3. Add the Following code to the *Main* method: 
  
@@ -485,7 +485,7 @@ var consoleReadTask = Task.Run(async () => {
         var newMessageSendDelayValue = userInput.IsNullOrWhiteSpace() ? "" : userInput?.ToLowerInvariant(); 
         switch (newMessageSendDelayValue) 
         { 
-            // Allow the user to exit the application gracefully  
+            // Allow the user to exit the application gracefully 
             case "exit": 
                 cts.Cancel(); 
                 return; 
@@ -500,17 +500,17 @@ Task.WaitAll(consoleReadTask);
  
 ``` 
  
-This code parses the configuration file information and sets up the Device Registry Manager. Additionally,  
+This code parses the configuration file information and sets up the Device Registry Manager. Additionally, 
 it creates the shell of a Task to read user input from the Console. 
  
 ## Send Desired Configuration 
  
-Each time a user enters a value in the console, the Service application will relay  
-the configuration change request to the device leveraging the IoT Hub's Device Twin  
-capabilities.  The Twin is a bi-directional cloud based projection of the device,  
-through which configuration and status information can flow.   
+Each time a user enters a value in the console, the Service application will relay 
+the configuration change request to the device leveraging the IoT Hub's Device Twin 
+capabilities.  The Twin is a bi-directional cloud based projection of the device, 
+through which configuration and status information can flow.  
  
-1. In *Service.cs* add the following method that selects the device twin information  
+1. In *Service.cs* add the following method that selects the device twin information 
 from the IoT Hub and prints the results to the console: 
  
 ```C# 
@@ -532,17 +532,17 @@ private static async Task QueryTwinConfiguration(RegistryManager registryManager
 } 
 ``` 
  
-This method can be called anytime you wish to display the Device Twin's Desired or Reported  
+This method can be called anytime you wish to display the Device Twin's Desired or Reported 
 configuration information. 
  
-2.  Next, add a method that will send the desired configuration information to the  
+2.  Next, add a method that will send the desired configuration information to the 
 Device Twin: 
  
 ```C# 
 private static async Task SendDesiredConfiguration( 
-    RegistryManager registryManager,  
+    RegistryManager registryManager, 
     string deviceId, 
-    CancellationToken cancellationToken,  
+    CancellationToken cancellationToken, 
     string newMessageSendDelayValue) 
 { 
     // Get the latest Device Twin State 
@@ -561,7 +561,7 @@ private static async Task SendDesiredConfiguration(
         } 
     }; 
  
-    ($"Sending desired configuration change for setting `messageSendDelay` with value: " +  
+    ($"Sending desired configuration change for setting `messageSendDelay` with value: " + 
         "{newMessageSendDelayValue} to deviceId: {deviceId}").LogMessage(ConsoleColor.Green); 
  
     await 
@@ -572,13 +572,13 @@ private static async Task SendDesiredConfiguration(
 } 
 ``` 
  
-This method -  
+This method - 
     - Gets the latest Device Twin information 
     - Defines a new `patch` object used to update the Device Twin 
-    - Updates the Device Twin  
+    - Updates the Device Twin 
     - Logs the current *Desired Configuration* to the console. 
  
-3. Lastly, add the following line to the *default* case of the `consoleReadTask` task  
+3. Lastly, add the following line to the *default* case of the `consoleReadTask` task 
 in the *Main* method: 
  
 ```C# 
@@ -588,8 +588,8 @@ break;
  
 ## Add Desired Property Change Handler 
  
-The next step is to have the *Simulator* monitor for change requests and stage them for application by  
-the *Direct Method*.  In this process, the *Simulator* will send an event to the IoT Hub indicating  
+The next step is to have the *Simulator* monitor for change requests and stage them for application by 
+the *Direct Method*.  In this process, the *Simulator* will send an event to the IoT Hub indicating 
 whether or not the configuration change request validation was successful. 
  
 1. Add the following method to *Simulator.cs*: 
@@ -610,21 +610,21 @@ private static async Task OnDesiredPropertyChange(TwinCollection desiredproperti
  
         if (int.TryParse(deviceTwinConfig.MessageSendDelay, out delay)) 
         { 
-             
+            
         } 
         else 
         { 
-             
+            
         } 
  
         await _deviceClient.SendEventAsync(message); 
     } 
 } 
 ``` 
-This handler ensures that the (Desired Configuration* contains the `deviceTwinConfig` object  
+This handler ensures that the (Desired Configuration* contains the `deviceTwinConfig` object 
 and sets up validation for the requested configuration change. 
  
-2. In the validation failure case, the `else` branch of the above handler, add the  
+2. In the validation failure case, the `else` branch of the above handler, add the 
 following code: 
 
 ```C# 
@@ -642,11 +642,11 @@ message.Properties.Add(MessageProperty.Status.ToString("G"), Status.Rejected.ToS
 message.Properties.Add(MessageProperty.Severity.ToString("G"), Severity.Critical.ToString("G")); 
 ``` 
  
-This code will set the `_propertyChangeStatus` to **Rejected** and create a new **Critical** notification  
+This code will set the `_propertyChangeStatus` to **Rejected** and create a new **Critical** notification 
 to be sent to the IoT Hub.  Since the message is flagged with the *Severity* property set to 
 **Critical**, the *IoT Hub*'s routing will kick in and forward the message onto the *Service Bus*. 
  
-3. In the validation *success* case, the `if` branch of the `OnDesiredPropertyChange` handler,  
+3. In the validation *success* case, the `if` branch of the `OnDesiredPropertyChange` handler, 
 add the following code: 
  
 ```C# 
@@ -665,12 +665,12 @@ message.Properties.Add(MessageProperty.Status.ToString("G"), Status.Pending.ToSt
 message.Properties.Add(MessageProperty.Severity.ToString("G"), Severity.Critical.ToString("G")); 
 ``` 
  
-This code will lock our synchronizing object, update the *Simulator*'s fields and prepare a  
+This code will lock our synchronizing object, update the *Simulator*'s fields and prepare a 
 critical *success* message to be sent to the IoT Hub.  As with the failure case, the **Critical** 
 message property will be processed by the IoT Hub's routing mechanism, forwarding it onto the 
-Service Bus.  
+Service Bus. 
  
-4. Lastly, register the `OnDesiredPropertyChange` callback handler in *Main* by adding the following  
+4. Lastly, register the `OnDesiredPropertyChange` callback handler in *Main* by adding the following 
 line inside the initialization task, just after `await Connect(_deviceClient);`: 
  
 ```C# 
@@ -681,11 +681,11 @@ await _deviceClient.SetDesiredPropertyUpdateCallback(OnDesiredPropertyChange, nu
  
 ## Create Critical Notification Monitor 
  
-With messages marked as **Critical** flowing to the the custom *IoT Hub Route*, and onto the  
+With messages marked as **Critical** flowing to the the custom *IoT Hub Route*, and onto the 
 Service Bus, we now need to write a Service application handler to process them.  The 
 handler will process Service Bus messages based on their *Status*.  For messages where 
 the desired configuration value validation succeeded, the code will invoke a 
-*Direct Method* on the device, making the configuration change permanent.  
+*Direct Method* on the device, making the configuration change permanent. 
  
 1.  Add the following code to the *Service* class: 
  
@@ -702,7 +702,7 @@ private static void CriticalNotificationMonitor(
     var serviceClient = ServiceClient.CreateFromConnectionString(iotHubConnectionString); 
  
     client.OnMessage(async message => 
-    {  
+    { 
  
     }); 
 } 
@@ -715,9 +715,9 @@ implemented in the *Simulator*.
  
 ```C# 
     var status = (Status) Enum.Parse( 
-                    typeof(Status),  
+                    typeof(Status), 
                     (string) message.Properties[MessageProperty.Status.ToString("G")]); 
-```  
+``` 
 Though the code completion benefits of using `enum`s for state representation 
 are helpful, crossing domain boundaries with them can be cause for exceptionally 
 verbose code, like the parse statement above.  Use this technique with caution; 
@@ -741,7 +741,7 @@ switch (status)
 } 
 ``` 
  
-We are primarily interested in messages that have a either **Pending** or **Rejected**  
+We are primarily interested in messages that have a either **Pending** or **Rejected** 
 status; all others can simply result in an `ArgumentException`. 
  
 4. For desired configuration values that failed validation, **Rejected** case,
@@ -756,7 +756,7 @@ break;
  
 The code reads the body of the message as a `Stream` 
  
-5. If the desired configuration passed validation then we'll use the Service Client to call a  
+5. If the desired configuration passed validation then we'll use the Service Client to call a 
 direct method on the client as follows: 
  
 ```C# 
@@ -779,12 +779,12 @@ invoke the *Direct Method* and reports the result.
  
 ```C# 
 CriticalNotificationMonitor(serviceBusConfig, azureConfig.ConnectionString, testDevice.DeviceId, cts.Token); 
-```  
+``` 
  
 ## Add Direct Method to Activate Requested Change 
  
 We need to now add, and wire up a method that can answer calls to the *AcceptDesiredProperties* 
-*Direct Method*.  
+*Direct Method*. 
  
 1. Open the *Simulator* class and add the following method stub to the class: 
  
@@ -799,18 +799,18 @@ private static Task<MethodResponse> OnAcceptDesiredProperty(MethodRequest reques
     } 
     else 
     { 
-        // Lock could not be obtained or property change status != Pending.  
+        // Lock could not be obtained or property change status != Pending. 
     } 
     return 
         Task.FromResult(response); 
 } 
 ``` 
  
-This method defines a response object that well be sent back as the result of one of  
+This method defines a response object that well be sent back as the result of one of 
 the following cases: 
-- Lock object is available and the `_propertyChangeStatus` is set to **Pending**,  
+- Lock object is available and the `_propertyChangeStatus` is set to **Pending**, 
 indicating that the configuration change request can be applied. 
-- Lock object is not available becuase a configuration change request is being executed  
+- Lock object is not available becuase a configuration change request is being executed 
 or the `_propertyChangeStatus` is set to any other value than **Pending**. 
  
 2. In the second case, the `else` branch, add the following code: 
@@ -834,12 +834,12 @@ response = new MethodResponse(
 ); 
 ``` 
  
-As noted in the comments, *Direct Methods* do not expose the original cloud side  
-http request headers.  Typically, we would want the client,  
+As noted in the comments, *Direct Methods* do not expose the original cloud side 
+http request headers.  Typically, we would want the client, 
 the Service application, to make an assertion about the required state of the server, 
 the Simulator, as a precondition for fulfilment of the request. Despite not being 
 able to leverage a *Precondition header* typically associated with a 412 response, 
-will use the *Precondition Failed* response code because the server's state was  
+will use the *Precondition Failed* response code because the server's state was 
 technically unacceptable for successful processing of the request. 
  
 3. In the successful path, the `if` branch, add the following code: 
@@ -868,13 +868,13 @@ finally
 } 
 ``` 
  
-In this branch, we have acquired  a lock to safely modify both the `_propertyChangeStatus`  
-and `_messageSendDelay` fields.  Additionally we create a response message for relay  
-back to the client, indicating successful application of the desired property. Lastly,  
-we need to make sure to release the lock we acquired in the `if` statement.  
+In this branch, we have acquired  a lock to safely modify both the `_propertyChangeStatus` 
+and `_messageSendDelay` fields.  Additionally we create a response message for relay 
+back to the client, indicating successful application of the desired property. Lastly, 
+we need to make sure to release the lock we acquired in the `if` statement. 
  
-3. Now, modify the initialization task in the *Simulator.cs* to register the  
-*Direct Method* handler.  
+3. Now, modify the initialization task in the *Simulator.cs* to register the 
+*Direct Method* handler. 
 
 ```C#
  _deviceClient.SetMethodHandler("AcceptDesiredProperties", OnAcceptDesiredProperty, null);
@@ -892,12 +892,12 @@ Task.Run(async () =>
     // Add Callback for Desired Configuration changes. 
     await _deviceClient.SetDesiredPropertyUpdateCallback(OnDesiredPropertyChange, null); 
  
-    // Add Handler to set property request  
+    // Add Handler to set property request 
     _deviceClient.SetMethodHandler("AcceptDesiredProperties", OnAcceptDesiredProperty, null); 
 } 
 , cts.Token) 
 .Wait(cts.Token); 
-```  
+``` 
  
 The `OnAcceptDesiredProperty` handler will now be called anytime the *AcceptDesiredProperties* 
 Direct Method is called. 
@@ -908,13 +908,13 @@ Direct Method is called.
 - Right Click on the Solution in the Visual Studio *Solution Explorer*, Select **Set Startup Projects ...** 
 - Check **Multiple startup projects** and set the *Service* and *Simulator* projects to **Start** 
 - Click **Apply** and **OK** 
-- Run the Solution  
+- Run the Solution 
 - Try entering new millisecond values at the prompt, or illegal values like 'moose'. 
  
 ## Extra Credit 1 - Twin Reported Configuration 
  
-- In the *Simulator* application's `OnAcceptDesiredProperty` method, make a change  
-to the success branch to update the Device Twin's Reported Configuration with the  
+- In the *Simulator* application's `OnAcceptDesiredProperty` method, make a change 
+to the success branch to update the Device Twin's Reported Configuration with the 
 accepted _messageSendDelay value.  Here is some example code to work from: 
  
 ```C# 
@@ -925,34 +925,34 @@ Client.UpdateReportedPropertiesAsync(reportedProperties);
 ``` 
  
 - In the *Service* application's `QueryTwinConfiguration` method print the device's 
-reported configuration element.  In the `CriticalNotificationMonitor` method call  
-`QueryTwinConfiguration` if the `serviceClient.InvokeDeviceMethodAsync` returns an  
+reported configuration element.  In the `CriticalNotificationMonitor` method call 
+`QueryTwinConfiguration` if the `serviceClient.InvokeDeviceMethodAsync` returns an 
 HTTP status code equal to 200. 
  
 ## Extra Credit 2 - Push notifications with Flow 
  
-- Add a second Service Bus Queue to split *Pending* and *Rejected* notifications  
+- Add a second Service Bus Queue to split *Pending* and *Rejected* notifications 
 to discrete queues.
 - Recreate the IoT Hub with a **Basic** pricing tier. 
 - Add a new *Endpoint* and *Route* to split **Pending** and **Rejected** notifications. 
-- Modify the `CriticalNotificationMonitor` method of the Service project, adding  
+- Modify the `CriticalNotificationMonitor` method of the Service project, adding 
 discrete `OnMessage` handlers for both **Pending** and **Rejected** queues. 
 - In the **Rejected** handler add code to post the following JSON object to a URL. 
-```JAVASCRIPT  
+```JAVASCRIPT 
 { 
     "Type":"ConfigChange", 
     "Severity":"Critical", 
     "Message":"this is some text" 
 } 
 ``` 
-- Download the [Microsoft Flow](https://flow.microsoft.com/en-us/) application  
-to your phone and sign in.  
-- Go to [Microsoft Flow](https://flow.microsoft.com/en-us/) and sign in with  
+- Download the [Microsoft Flow](https://flow.microsoft.com/en-us/) application 
+to your phone and sign in. 
+- Go to [Microsoft Flow](https://flow.microsoft.com/en-us/) and sign in with 
 the same account used on your phone. 
     - Select *My flows* 
     - Select *Create a flow from blank* 
     - Select *Request* and enter the following JSON Schema: 
-```JAVASCRIPT  
+```JAVASCRIPT 
 { 
   "$schema": "http://json-schema.org/draft-04/schema#", 
   "type": "object", 
@@ -975,10 +975,10 @@ the same account used on your phone.
 } 
 ``` 
 - Add a **New Step** 
-- Select **Send a push notification**, enter "Received the following critical notification: ",  
-press **Add dynamic content** and Select `Message` to add the *Message* property of the JSON  
-object from the Request Body.   
+- Select **Send a push notification**, enter "Received the following critical notification: ", 
+press **Add dynamic content** and Select `Message` to add the *Message* property of the JSON 
+object from the Request Body.  
 - Save the Flow, copy the generated URL in the *Request* step and use it in the *Rejected* 
-queue flow in the Service Application.  
-- You should now receive push notifications to your phone every time a bad desired configuration  
+queue flow in the Service Application. 
+- You should now receive push notifications to your phone every time a bad desired configuration 
 value is sent to the simulator. 

@@ -77,6 +77,12 @@ can facilitate the real time distribution of events to specific consumers and da
 can be utilized to coordinate behavior changes in one or more remote devices by calling 
 specific methods in the remote device's code base.
    
+Additionally, the workshop solution file includes a small console application that will be 
+used to register the *Simulator* as a device with the *IoT Hub*.  Lastly, the Simulator, 
+Service and Device Registration applications, will all reference a *Core* project which 
+includes shared types, configuration file accessor methods and a few useful extenion methods.
+
+
 ### Example Work Flow
 
 The example work flow that will be implemented is as follows: 
@@ -108,11 +114,12 @@ device will then alter its reporting frequency.
 | :------------ | :------------ |
 | Simulator  | the application the represents a remote device  |
 | Service  | the application that controls the *Simulator*  |
+| CreateDeviceIdentity | the application that will register the *Simulator* with the *IoT Hub*  |
 | Device Twin  | a cloud based projection of a device, facilitating bidirectional information flow  |
 | Direct Method  | a interface and execution mechanism for invoking methods on a remote device  |
-| Notification |  a message from the simulator to IoT Hub with information about configuration change requests |
 | Desired Configuration  | configuration in a Device Twin that the remote device should use  |
 | Reported Configuration  | the configuration in a Device Twin as reported by the remote device  |
+| Notification |  a message from the simulator to IoT Hub with information about configuration change requests |
 
 
 ### Prerequisites 
@@ -125,9 +132,9 @@ minutes.)
  
 ### Extra Credit 
  
-If you complete the workshop ahead of schedule, there are *Extra Credit* 
-exercises that will explore Device Twin Reported Configurations and the 
-integration of Push Notifications with Microsoft Flow. 
+If you complete the workshop, there are several *Extra Credit* 
+exercises that explore Device Twin Reported Configurations and the 
+integration of Push Notifications into the workflow with Microsoft Flow. 
 
  
 ## Solution Setup 
@@ -136,13 +143,13 @@ integration of Push Notifications with Microsoft Flow.
  
 1. Open the [TwinsRoutingMethods solution file](/TwinsRoutingMethods.sln) in Visual Studio. 
  
-2. Add a new project for for the Device Simulator. Click **File** > **Add** > 
+2. Add a new project for for the device *Simulator*. Click **File** > **Add** > 
 **New Project...**, Select **Visual C#** > **Windows** > **Console Application**, 
 in the *Name* box enter **Simulator**. 
  
 3. Add a *Project Reference* to the included *Core* project. Right click on the project 
 in the *Solution Explorer*, and Select **Add** > **Reference**.  From the left nav, 
-select **Project** > **Solution**, and add the *Core* project. 
+select **Project** > **Solution**, and add the **Core** project. 
  
 4. Use Nuget to add **Microsoft.Azure.Devices.Client** package.  Right click on the 
 *Simulator* project, select **Manage Nuget Packages...**.  In the dialog, browse for 
@@ -151,7 +158,7 @@ several dependent packages after installation.
  
 ### Service Application 
  
-1. Add a new project for the Service Application. Click **File** > **Add** > 
+1. Add a new project for the *Service* application. Click **File** > **Add** > 
 **New Project...**, Select **Visual C#** > **Windows** > **Console Application**, 
 in the *Name* box enter **Service**. 
  
@@ -160,7 +167,7 @@ in the *Solution Explorer*, and Select **Add** > **Reference**.  From the left n
 select **Project** > **Solution**, and add the *Core* project. 
  
 3. Use Nuget to add the **Microsoft.Azure.Devices.Client** and **WindowsAzure.ServiceBus** 
-packages.  Right click on the *Simulator* project, select **Manage Nuget Packages...**.  
+packages.  Right click on the *Simulator* project, select **Manage Nuget Packages...**. 
 In the dialog, browse for both packages, and install.  You may need to **Update** several 
 dependent packages after installation. 
  
@@ -184,11 +191,13 @@ pricing tier.
     This tutorial does not require a specific tier.  For this workshop, use the Basic tier. 
     - In **Resource Group**, either create a resource group, or select an existing one. For 
     more information, see [Using resource groups to manage your Azure resources](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-portal). 
+    It is suggested that you create a new, dedicated resource group for this workshop 
+    to facilitate easy resource removal at the end of the workshop. 
     - In **Location**, select the location to host your Service Bus. For this workshop, 
     choose your nearest location. 
  
 4. When you have chosen your Service Bus configuration options, click **Create**.  It can 
-take a few minutes for Azure to create your Service Bus.  To check the status you can monitor 
+take a few minutes for Azure to create the new Service Bus.  To check the status you can monitor 
 the process on the Startboard or in the Notification panel. 
  
 5. When the Service Bus has been successfully created, click the new tile for your Service Bus in the Azure 
@@ -203,7 +212,7 @@ string should look like:
 `Endpoint=sb://{Service Bus Name}.servicebus.windows.net/;SharedAccessKeyName=Listener;SharedAccessKey={Shared Access Key}` 
  
 7. In the **Queues** blade, click the **Add** button and create a new queue for 
-*critical-notifications*.  In the *Name* box, enter `critical-notifications` and press **Create**. 
+*critical-notifications*.  In the **Name** box, enter `critical-notifications` and press **Create**. 
  
 8. Back in the solution's *config.yaml* file, set the **AzureServiceBusConfig** > **QueueName** 
 field to the same value (`critical-notifications`). 
@@ -211,13 +220,14 @@ field to the same value (`critical-notifications`).
  
 ## Creating an IoT Hub 
  
-1. In the Jumpbar, click **New** > **Internet of Things** > **IoT Hub**. 
+1. In the Azure Portal Jumpbar, click **New** > **Internet of Things** > **IoT Hub**. 
  
 2. In the *IoT Hub* blade, configure your IoT Hub, selecting the appropriate pricing tier. 
     - In the **Name** box, enter a name for your IoT HUb. If the **Name** is valid and 
     available, a green check mark appears in the **Name** box. 
     - Select a [pricing and scale tier](https://azure.microsoft.com/en-us/pricing/details/iot-hub/). 
     This tutorial does not require a specific tier.  For this workshop, use the Free tier. 
+    Note: the *Extra Credit* will require at least the **Basic** tier. 
     - In **Resource Group**, select the resource group created in the previous section. For 
     more information, see [Using resource groups to manage your Azure resources](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-portal). 
     - In **Location**, select the location to host your IoT Hub. For this workshop, 
@@ -239,6 +249,10 @@ the Azure portal to open the blade for the new IoT Hub.
     **ConnectionString** field.  The connection string should look like: 
     `HostName={Iot Hub Name}.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey={Shared Access Key}` 
  
+Note: *IoT Hub* supports fine grain control of access and permissions; non-trivial applications 
+should leverage these feature.  Please reference the [Control access to IoT Hub](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-security) 
+document for further information on access control and permissions.
+
 ### Add IoT Hub Endpoint 
  
 1. In the *Endpoints* blade of the *IoT Hub*, select **Add**. 
@@ -246,7 +260,7 @@ the Azure portal to open the blade for the new IoT Hub.
 2. In the *Add endpoint* blade, configure the new endpoint. 
     - In the *Name* box, enter a name for the new Endpoint. 
     - Select an *Endpoint type* of **Service Bus Queue**. 
-    - In the *Service Bus namespace* dropdown, select the previously created Service Bus. 
+    - In the *Service Bus namespace* dropdown, select the previously created *Service Bus*. 
     - In the *Service Bus queue* dropdown, select the *critical-notifications* queue. 
  
 3. Click **OK** to create the new *Endpoint* 
@@ -260,14 +274,14 @@ the Azure portal to open the blade for the new IoT Hub.
     - In the *Data source* dropdown, select **Device Messages**. 
     - Set the *Endpoint* to the **critical-notifications* endpoint created above. 
     - Make sure the *Enable Rule* toggle is set to **On**. 
-    - In the *Query string* box, enter `severity="critical"`. 
+    - In the *Query string* box, enter `severity="Critical"`. 
     - In the *Test the route* box paste the following JSON: 
  
     ```JAVASCRIPT 
     { 
     "devicemessage": { 
         "appProperties": { 
-        "severity": "critical" 
+        "severity": "Critical" 
         } 
     } 
     } 
@@ -283,16 +297,16 @@ the Azure portal to open the blade for the new IoT Hub.
 2. Under the *DeviceConfigs* section of the YAML file, add a unique value for the *DeviceId* 
 field. 
  
-3. Run the CreateDeviceIdentity project. In the Solution Explorer, right click on the 
-*CreateDeviceIdentity* project and select**Set as Startup Project**.  Running the solution 
+3. Run the **CreateDeviceIdentity** project. In the Solution Explorer, right click on the 
+*CreateDeviceIdentity* project and select **Set as Startup Project**.  Running the solution 
 will add a [Device Identity](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-csharp-csharp-getstarted#create-a-device-identity) 
-for the test Device to your IoT Hub.  The console application will automatically insert and 
-save the device key generated by your IoT Hub, to the solutions's *config.yaml* file. 
+for the test Device to your *IoT Hub*.  The console application will automatically insert and 
+save to the solutions's *config.yaml* file, the device key generated by your IoT Hub. 
  
 ## Creating Device Simulator 
  
 1. Open the *Simulator* project, right click on the *Program.cs* file and select **Rename**. 
-Enter **Simulator.cs** at the prompt and allow Visual Studio to rename the class as well.  
+Enter **Simulator.cs** at the prompt and allow Visual Studio to rename the class as well. 
  
 2. Add the following `using` statements at the top: 
  
@@ -345,11 +359,11 @@ cts.Cancel();
 ``` 
  
 This code parses the *config.yaml* file into local varaibles and adds a 
-Cancellation Token that will be used to gracefully exit tasks we'll build later. 
+Cancellation Token that will be used to gracefully exit tasks that will be build later. 
 Then, it creates a *Device Client* that will be used to interact with the IoT Hub. 
  
-5. Add the following method to the *Simulator* class that will initialized the device 
-clients connection to the IoT Hub: 
+5. Add the following method to the *Simulator* class which will initialize the device 
+client's connection to IoT Hub: 
  
 ```C# 
 private static async Task Connect(DeviceClient deviceClient) 
@@ -366,8 +380,8 @@ private static async Task Connect(DeviceClient deviceClient)
 } 
 ``` 
  
-6. Add the following method to the *Simulator* class to initialize the local 
-copy of the Device Twin Desired Configuration. 
+6. Add the following method to the *Simulator* class to initialize a local 
+copy of the Device Twin's Desired Configuration. 
  
 ```C# 
 private static async Task GetInitialDesiredConfiguration(DeviceClient deviceClient) 
@@ -379,8 +393,8 @@ private static async Task GetInitialDesiredConfiguration(DeviceClient deviceClie
 } 
 ``` 
  
-Here we are deserializing the configuration to a type in the *Core* project to 
-make working with the Desired Configuration simpler and type safe.  
+Here we are deserializing the configuration to a type in the *Core* project, 
+making work with the Desired Configuration simpler and type safe. 
  
 7. Call the `Connect` and `GetInitialDesiredConfiguration` methods from `Main` 
 just after the *deviceClient* is initialized as follows: 
@@ -394,7 +408,7 @@ Task.Run(async () =>
 .Wait(cts.Token); 
 ``` 
  
-We'll be adding more methods to this async lambda later. 
+Additional methods will be added to this async lambda later. 
  
 8. Next, add the following method to the *Simulator* class: 
  
@@ -426,13 +440,13 @@ private static async Task DataSend(DeviceClient deviceClient, CancellationToken 
     } 
 } 
 ``` 
+
 This method runs a loop that will send a new GUID payload to the IoT Hub at 
 intervals specified by the `_messageSendDelay` field. We will leverage the 
-lock to ensure a consistent read of the *_messageSendDelay* field. 
+lock to ensure a consistent read of the `_messageSendDelay` field. 
  
-*Note/Extra Credit:* passing a 
-`Func<int>` to retrieve the delay value on each loop would likely be prefereable 
-to enhance testability. 
+*Note/Extra Credit:* passing a `Func<int>` to retrieve the delay value 
+on each loop would likely be prefereable to enhance testability. 
  
 9. Call the `DataSend` method from `Main` just after the *Connect* task, 
 as follows: 
@@ -442,7 +456,7 @@ Task.Run(() => DataSend(_deviceClient, cts.Token), cts.Token);
 ``` 
  
 The shell of the simulator application is now complete.  We'll be adding a few 
-callback and event handlers later in the tutorial. 
+callback and event handlers later in the workshop. 
  
 ## Create Service Application 
  
@@ -464,7 +478,7 @@ using Microsoft.ServiceBus.Messaging;
 using Newtonsoft.Json; 
 ``` 
  
-3. Add the Following code to the *Main* method: 
+3. Add the following code to the *Main* method: 
  
 ```C# 
 const string configFilePath = @"../../../config/config.yaml"; 
@@ -506,9 +520,9 @@ it creates the shell of a Task to read user input from the Console.
 ## Send Desired Configuration 
  
 Each time a user enters a value in the console, the Service application will relay 
-the configuration change request to the device leveraging the IoT Hub's Device Twin 
+the configuration change request to the device, leveraging the IoT Hub's Device Twin 
 capabilities.  The Twin is a bi-directional cloud based projection of the device, 
-through which configuration and status information can flow.  
+through which configuration and status information can flow. 
  
 1. In *Service.cs* add the following method that selects the device twin information 
 from the IoT Hub and prints the results to the console: 
@@ -533,9 +547,9 @@ private static async Task QueryTwinConfiguration(RegistryManager registryManager
 ``` 
  
 This method can be called anytime you wish to display the Device Twin's Desired or Reported 
-configuration information. 
+Configuration information. 
  
-2.  Next, add a method that will send the desired configuration information to the 
+2.  Next, add a method that will send the Desired configuration information to the 
 Device Twin: 
  
 ```C# 
@@ -905,11 +919,18 @@ Direct Method is called.
  
 ## Run Solution 
  
-- Right Click on the Solution in the Visual Studio *Solution Explorer*, Select **Set Startup Projects ...** 
-- Check **Multiple startup projects** and set the *Service* and *Simulator* projects to **Start** 
-- Click **Apply** and **OK** 
-- Run the Solution 
-- Try entering new millisecond values at the prompt, or illegal values like 'moose'. 
+1. Right Click on the Solution in the Visual Studio *Solution Explorer*, Select **Set Startup Projects ...** 
+2. Check **Multiple startup projects** and set the *Service* and *Simulator* projects to **Start** 
+3. Click **Apply** and **OK** 
+4. Run the Solution 
+5. Try entering new millisecond values at the prompt, or illegal values like 'moose'. 
+
+## Wrap-up
+
+1. In the Azure Portal, select *Resource groups* from the Jumpbar.
+2. From the list of resource groups, select the resource group associated with this workshop.
+3. Click **Delete** at the top of the resource group blade.
+4. Follow the prompts to remove all the resources associated with this workshop.
  
 ## Extra Credit 1 - Twin Reported Configuration 
  

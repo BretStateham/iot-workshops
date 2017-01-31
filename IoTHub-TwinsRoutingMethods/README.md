@@ -1,4 +1,4 @@
-# Update IoT Devices Using Device Twins, Direct Methods and Mesasge Routing 
+# Update IoT Devices Using Device Twins, Direct Methods and Message Routing 
  
 ## Overview 
  
@@ -116,7 +116,7 @@ device will then alter its reporting frequency.
 | Service  | the application that controls the *Simulator*  |
 | CreateDeviceIdentity | the application that will register the *Simulator* with the *IoT Hub*  |
 | Device Twin  | a cloud based projection of a device, facilitating bidirectional information flow  |
-| Direct Method  | a interface and execution mechanism for invoking methods on a remote device  |
+| Direct Method  | an interface and execution mechanism for invoking methods on a remote device  |
 | Desired Configuration  | configuration in a Device Twin that the remote device should use  |
 | Reported Configuration  | the configuration in a Device Twin as reported by the remote device  |
 | Notification |  a message from the simulator to IoT Hub with information about configuration change requests |
@@ -143,7 +143,7 @@ integration of Push Notifications into the workflow with Microsoft Flow.
  
 1. Open the [TwinsRoutingMethods solution file](/TwinsRoutingMethods.sln) in Visual Studio. 
  
-2. Add a new project for for the device *Simulator*. Click **File** > **Add** > 
+2. Add a new project for the device *Simulator*. Click **File** > **Add** > 
 **New Project...**, Select **Visual C#** > **Windows** > **Console Application**, 
 in the *Name* box enter **Simulator**. 
  
@@ -635,8 +635,9 @@ private static async Task OnDesiredPropertyChange(TwinCollection desiredproperti
     } 
 } 
 ``` 
-This handler ensures that the (Desired Configuration* contains the `deviceTwinConfig` object 
-and sets up validation for the requested configuration change. 
+This handler ensures that the *Desired Configuration* contains the `deviceTwinConfig` object 
+and sets up validation for the requested configuration change.  The delay value will be 
+converted and applied during the call to the Direct Method later. 
  
 2. In the validation failure case, the `else` branch of the above handler, add the 
 following code: 

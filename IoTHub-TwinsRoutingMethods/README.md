@@ -13,7 +13,7 @@ need a reference.
 - [Scenario](#scenario)
   - [Example Work Flow](#example-work-flow)
   - [Technologies](#technologies)
-  - [Termonology](#terminology)
+  - [Terminology](#terminology)
   - [Prerequisites](#prerequisites)
   - [Extra Credit](#extra-credit)
 - [Solution Setup](#solution-setup) 

@@ -103,11 +103,11 @@ device will then alter its reporting frequency.
 
 ### Key Workshop Technologies 
  
-- [IoT Hub](https://azure.microsoft.com/en-us/services/iot-hub/)
-    - [Device Twins](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-device-twins) 
-    - [Direct Methods](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-direct-methods) 
-    - [Routes](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-endpoints#custom-routing-endpoints) 
-- [Service Bus](https://azure.microsoft.com/en-us/services/service-bus/)
+- [IoT Hub](https://azure.microsoft.com/en-us/services/iot-hub/) - Azure service for managing and ingesting data from IoT devices. 
+    - [Device Twins](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-device-twins) - IoT Hub feature for bidirectional device state exchange.  
+    - [Direct Methods](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-direct-methods) - IoT Hub feature for invoking methods on a target device.  
+    - [Routes](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-endpoints#custom-routing-endpoints) - IoT Hub feature for property based message routing.  
+- [Service Bus](https://azure.microsoft.com/en-us/services/service-bus/) - Reliable cloud based messaging as a service.   
  
 ### Terminology
 

@@ -466,18 +466,18 @@ Enter **Service.cs** at the prompt and allow Visual Studio to rename the class a
  
 2. Add the following `using` statements at the top of the file: 
  
-```C# 
-using System; 
-using System.IO; 
-using System.Linq; 
-using System.Threading; 
-using System.Threading.Tasks; 
-using Core; 
-using Microsoft.Azure.Devices; 
-using Microsoft.Azure.Devices.Common; 
-using Microsoft.ServiceBus.Messaging; 
-using Newtonsoft.Json; 
-``` 
+    ```C# 
+    using System; 
+    using System.IO; 
+    using System.Linq; 
+    using System.Threading; 
+    using System.Threading.Tasks; 
+    using Core; 
+    using Microsoft.Azure.Devices; 
+    using Microsoft.Azure.Devices.Common; 
+    using Microsoft.ServiceBus.Messaging; 
+    using Newtonsoft.Json; 
+    ``` 
  
 3. Add the following code to the *Main* method: 
  

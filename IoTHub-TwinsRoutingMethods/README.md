@@ -101,9 +101,9 @@ failure, it will display an error message to the user.
 instruct the Device to apply the desired configuration change permanently.  The 
 device will then alter its reporting frequency.
 
-### Technologies 
+### Key Workshop Technologies 
  
-- [IoT Hub](https://azure.microsoft.com/en-us/services/iot-hub/) - used 
+- [IoT Hub](https://azure.microsoft.com/en-us/services/iot-hub/)
     - [Device Twins](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-device-twins) 
     - [Direct Methods](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-direct-methods) 
     - [Routes](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-devguide-endpoints#custom-routing-endpoints) 

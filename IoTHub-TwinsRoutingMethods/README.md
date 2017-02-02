@@ -82,6 +82,7 @@ used to register the *Simulator* as a device with the *IoT Hub*.  Lastly, the Si
 Service and Device Registration applications, will all reference a *Core* project which 
 includes shared types, configuration file accessor methods and a few useful extenion methods.
 
+![Solution Architecture](assets/block.jpg "Solution Architecture")
 
 ### Example Work Flow
 

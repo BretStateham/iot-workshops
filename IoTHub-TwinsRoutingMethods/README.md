@@ -174,7 +174,7 @@ dependent packages after installation.
  
 ### Configuration 
  
-1) Create a local config.yaml file.  In the *Solution Explorer*, open the *config* solution 
+1. Create a local config.yaml file.  In the *Solution Explorer*, open the *config* solution 
 folder.  Copy and rename *config.default.yaml* -> *config.yaml*. 
  
 ## Creating an Azure Service Bus 
@@ -527,79 +527,79 @@ through which configuration and status information can flow.
  
 1. In *Service.cs* add the following method that selects the device twin information 
 from the IoT Hub and prints the results to the console: 
- 
-```C# 
-private static async Task QueryTwinConfiguration(RegistryManager registryManager, string deviceId) 
-{ 
-    var query = registryManager.CreateQuery($"SELECT * FROM devices WHERE deviceId = '{deviceId}'"); 
-    var results = await query.GetNextAsTwinAsync(); 
- 
-    foreach (var result in results) 
+    
+    ```C# 
+    private static async Task QueryTwinConfiguration(RegistryManager registryManager, string deviceId) 
     { 
-        Console.WriteLine(); 
-        $"Config report for: {result.DeviceId}".LogMessage(ConsoleColor.DarkYellow); 
- 
-        $"Desired deviceTwinConfig: {JsonConvert.SerializeObject(result.Properties.Desired, Formatting.Indented)}" 
-            .LogMessage(ConsoleColor.Yellow); 
- 
-        Console.WriteLine(); 
+        var query = registryManager.CreateQuery($"SELECT * FROM devices WHERE deviceId = '{deviceId}'"); 
+        var results = await query.GetNextAsTwinAsync(); 
+    
+        foreach (var result in results) 
+        { 
+            Console.WriteLine(); 
+            $"Config report for: {result.DeviceId}".LogMessage(ConsoleColor.DarkYellow); 
+    
+            $"Desired deviceTwinConfig: {JsonConvert.SerializeObject(result.Properties.Desired, Formatting.Indented)}" 
+                .LogMessage(ConsoleColor.Yellow); 
+    
+            Console.WriteLine(); 
+        } 
     } 
-} 
-``` 
- 
-This method can be called anytime you wish to display the Device Twin's Desired or Reported 
-Configuration information. 
+    ``` 
+    
+    This method can be called anytime you wish to display the Device Twin's Desired or Reported 
+    Configuration information. 
  
 2.  Next, add a method that will send the Desired configuration information to the 
 Device Twin: 
- 
-```C# 
-private static async Task SendDesiredConfiguration( 
-    RegistryManager registryManager, 
-    string deviceId, 
-    CancellationToken cancellationToken, 
-    string newMessageSendDelayValue) 
-{ 
-    // Get the latest Device Twin State 
-    var twin = await registryManager.GetTwinAsync(deviceId, cancellationToken); 
- 
-    var patch = new 
+    
+    ```C# 
+    private static async Task SendDesiredConfiguration( 
+        RegistryManager registryManager, 
+        string deviceId, 
+        CancellationToken cancellationToken, 
+        string newMessageSendDelayValue) 
     { 
-        properties = new 
+        // Get the latest Device Twin State 
+        var twin = await registryManager.GetTwinAsync(deviceId, cancellationToken); 
+    
+        var patch = new 
         { 
-            desired = new 
+            properties = new 
             { 
-                deviceTwinConfig = 
-                new DesiredDeviceTwinConfiguration(Guid.NewGuid().ToString(), 
-                    newMessageSendDelayValue) 
+                desired = new 
+                { 
+                    deviceTwinConfig = 
+                    new DesiredDeviceTwinConfiguration(Guid.NewGuid().ToString(), 
+                        newMessageSendDelayValue) 
+                } 
             } 
-        } 
-    }; 
- 
-    ($"Sending desired configuration change for setting `messageSendDelay` with value: " + 
-        "{newMessageSendDelayValue} to deviceId: {deviceId}").LogMessage(ConsoleColor.Green); 
- 
-    await 
-        registryManager.UpdateTwinAsync(twin.DeviceId, JsonConvert.SerializeObject(patch), twin.ETag, 
-            cancellationToken); 
-    await 
-        Task.Run(() => QueryTwinConfiguration(registryManager, deviceId), cancellationToken); 
-} 
-``` 
- 
-This method - 
-    - Gets the latest Device Twin information 
-    - Defines a new `patch` object used to update the Device Twin 
-    - Updates the Device Twin 
-    - Logs the current *Desired Configuration* to the console. 
- 
+        }; 
+    
+        ($"Sending desired configuration change for setting `messageSendDelay` with value: " + 
+            "{newMessageSendDelayValue} to deviceId: {deviceId}").LogMessage(ConsoleColor.Green); 
+    
+        await 
+            registryManager.UpdateTwinAsync(twin.DeviceId, JsonConvert.SerializeObject(patch), twin.ETag, 
+                cancellationToken); 
+        await 
+            Task.Run(() => QueryTwinConfiguration(registryManager, deviceId), cancellationToken); 
+    } 
+    ``` 
+    
+    This method - 
+        - Gets the latest Device Twin information 
+        - Defines a new `patch` object used to update the Device Twin 
+        - Updates the Device Twin 
+        - Logs the current *Desired Configuration* to the console. 
+    
 3. Lastly, add the following line to the *default* case of the `consoleReadTask` task 
 in the *Main* method: 
- 
-```C# 
-await SendDesiredConfiguration(registryManager, testDevice.DeviceId, cts.Token, newMessageSendDelayValue); 
-break; 
-``` 
+    
+    ```C# 
+    await SendDesiredConfiguration(registryManager, testDevice.DeviceId, cts.Token, newMessageSendDelayValue); 
+    break; 
+    ``` 
  
 ## Add Desired Property Change Handler 
  
@@ -608,93 +608,93 @@ the *Direct Method*.  In this process, the *Simulator* will send an event to the
 whether or not the configuration change request validation was successful. 
  
 1. Add the following method to *Simulator.cs*: 
- 
-```C# 
-private static async Task OnDesiredPropertyChange(TwinCollection desiredproperties, object usercontext) 
-{ 
-    if (desiredproperties.Contains("deviceTwinConfig")) 
+    
+    ```C# 
+    private static async Task OnDesiredPropertyChange(TwinCollection desiredproperties, object usercontext) 
     { 
-        Message message; 
- 
-        var deviceTwinConfig = 
-            JsonConvert.DeserializeObject<DesiredDeviceTwinConfiguration>( 
-                desiredproperties["deviceTwinConfig"].ToString()); 
- 
-        // ignore delay for now. Just want to see if it can be parsed. 
-        int delay; 
- 
-        if (int.TryParse(deviceTwinConfig.MessageSendDelay, out delay)) 
+        if (desiredproperties.Contains("deviceTwinConfig")) 
         { 
-            
+            Message message; 
+    
+            var deviceTwinConfig = 
+                JsonConvert.DeserializeObject<DesiredDeviceTwinConfiguration>( 
+                    desiredproperties["deviceTwinConfig"].ToString()); 
+    
+            // ignore delay for now. Just want to see if it can be parsed. 
+            int delay; 
+    
+            if (int.TryParse(deviceTwinConfig.MessageSendDelay, out delay)) 
+            { 
+                
+            } 
+            else 
+            { 
+                
+            } 
+    
+            await _deviceClient.SendEventAsync(message); 
         } 
-        else 
-        { 
-            
-        } 
- 
-        await _deviceClient.SendEventAsync(message); 
     } 
-} 
-``` 
-This handler ensures that the *Desired Configuration* contains the `deviceTwinConfig` object 
-and sets up validation for the requested configuration change.  The delay value will be 
-converted and applied during the call to the Direct Method later. 
+    ``` 
+    This handler ensures that the *Desired Configuration* contains the `deviceTwinConfig` object 
+    and sets up validation for the requested configuration change.  The delay value will be 
+    converted and applied during the call to the Direct Method later. 
  
 2. In the validation failure case, the `else` branch of the above handler, add the 
 following code: 
 
-```C# 
-_propertyChangeStatus = Status.Rejected; 
- 
-($"Device Twin Property `messageSendDelay` is set to an illegal value: `{deviceTwinConfig.MessageSendDelay}`, " + 
-    $"change status is 'rejected'. Sending Critical Notification.").LogMessage(ConsoleColor.Red); 
- 
-message = new Message( 
-    Encoding.ASCII.GetBytes( 
-        $"Parameter messageSendDelay value: `{deviceTwinConfig.MessageSendDelay}`, could not be converted to an Int.")); 
- 
-message.Properties.Add(MessageProperty.Type.ToString("G"), Type.ConfigChage.ToString("G")); 
-message.Properties.Add(MessageProperty.Status.ToString("G"), Status.Rejected.ToString("G")); 
-message.Properties.Add(MessageProperty.Severity.ToString("G"), Severity.Critical.ToString("G")); 
-``` 
- 
-This code will set the `_propertyChangeStatus` to **Rejected** and create a new **Critical** notification 
-to be sent to the IoT Hub.  Since the message is flagged with the *Severity* property set to 
-**Critical**, the *IoT Hub*'s routing will kick in and forward the message onto the *Service Bus*. 
- 
+    ```C# 
+    _propertyChangeStatus = Status.Rejected; 
+    
+    ($"Device Twin Property `messageSendDelay` is set to an illegal value: `{deviceTwinConfig.MessageSendDelay}`, " + 
+        $"change status is 'rejected'. Sending Critical Notification.").LogMessage(ConsoleColor.Red); 
+    
+    message = new Message( 
+        Encoding.ASCII.GetBytes( 
+            $"Parameter messageSendDelay value: `{deviceTwinConfig.MessageSendDelay}`, could not be converted to an Int.")); 
+    
+    message.Properties.Add(MessageProperty.Type.ToString("G"), Type.ConfigChage.ToString("G")); 
+    message.Properties.Add(MessageProperty.Status.ToString("G"), Status.Rejected.ToString("G")); 
+    message.Properties.Add(MessageProperty.Severity.ToString("G"), Severity.Critical.ToString("G")); 
+    ``` 
+    
+    This code will set the `_propertyChangeStatus` to **Rejected** and create a new **Critical** notification 
+    to be sent to the IoT Hub.  Since the message is flagged with the *Severity* property set to 
+    **Critical**, the *IoT Hub*'s routing will kick in and forward the message onto the *Service Bus*. 
+    
 3. In the validation *success* case, the `if` branch of the `OnDesiredPropertyChange` handler, 
 add the following code: 
- 
-```C# 
-lock (Locker) 
-{ 
-    _twinDesiredProperties = deviceTwinConfig; 
-    _propertyChangeStatus = Status.Pending; 
-} 
-message = new Message( 
-    Encoding.ASCII.GetBytes( 
-        $"Device accepted messageSendDelay value: `{deviceTwinConfig.MessageSendDelay}`.  Property change is pending call to 'acceptDesiredProperties'.") 
-); 
- 
-message.Properties.Add(MessageProperty.Type.ToString("G"), Type.ConfigChage.ToString("G")); 
-message.Properties.Add(MessageProperty.Status.ToString("G"), Status.Pending.ToString("G")); 
-message.Properties.Add(MessageProperty.Severity.ToString("G"), Severity.Critical.ToString("G")); 
-``` 
- 
-This code will lock our synchronizing object, update the *Simulator*'s fields and prepare a 
-critical *success* message to be sent to the IoT Hub.  As with the failure case, the **Critical** 
-message property will be processed by the IoT Hub's routing mechanism, forwarding it onto the 
-Service Bus. 
+    
+    ```C# 
+    lock (Locker) 
+    { 
+        _twinDesiredProperties = deviceTwinConfig; 
+        _propertyChangeStatus = Status.Pending; 
+    } 
+    message = new Message( 
+        Encoding.ASCII.GetBytes( 
+            $"Device accepted messageSendDelay value: `{deviceTwinConfig.MessageSendDelay}`.  Property change is pending call to 'acceptDesiredProperties'.") 
+    ); 
+    
+    message.Properties.Add(MessageProperty.Type.ToString("G"), Type.ConfigChage.ToString("G")); 
+    message.Properties.Add(MessageProperty.Status.ToString("G"), Status.Pending.ToString("G")); 
+    message.Properties.Add(MessageProperty.Severity.ToString("G"), Severity.Critical.ToString("G")); 
+    ``` 
+    
+    This code will lock our synchronizing object, update the *Simulator*'s fields and prepare a 
+    critical *success* message to be sent to the IoT Hub.  As with the failure case, the **Critical** 
+    message property will be processed by the IoT Hub's routing mechanism, forwarding it onto the 
+    Service Bus. 
  
 4. Lastly, register the `OnDesiredPropertyChange` callback handler in *Main* by adding the following 
 line inside the initialization task, just after `await Connect(_deviceClient);`: 
- 
-```C# 
-// Add Callback for Desired Configuration changes. 
-await _deviceClient.SetDesiredPropertyUpdateCallback(OnDesiredPropertyChange, null); 
-``` 
- 
- 
+    
+    ```C# 
+    // Add Callback for Desired Configuration changes. 
+    await _deviceClient.SetDesiredPropertyUpdateCallback(OnDesiredPropertyChange, null); 
+    ``` 
+    
+    
 ## Create Critical Notification Monitor 
  
 With messages marked as **Critical** flowing to the the custom *IoT Hub Route*, and onto the 
@@ -704,221 +704,221 @@ the desired configuration value validation succeeded, the code will invoke a
 *Direct Method* on the device, making the configuration change permanent. 
  
 1.  Add the following code to the *Service* class: 
- 
-```C# 
-private static void CriticalNotificationMonitor( 
-    AzureServiceBusConfig serviceBusConfig, 
-    string iotHubConnectionString, 
-    string deviceId, 
-    CancellationToken token) 
-{ 
-    var client = QueueClient.CreateFromConnectionString(serviceBusConfig.ConnectionString, 
-        serviceBusConfig.QueueName); 
- 
-    var serviceClient = ServiceClient.CreateFromConnectionString(iotHubConnectionString); 
- 
-    client.OnMessage(async message => 
+    
+    ```C# 
+    private static void CriticalNotificationMonitor( 
+        AzureServiceBusConfig serviceBusConfig, 
+        string iotHubConnectionString, 
+        string deviceId, 
+        CancellationToken token) 
     { 
- 
-    }); 
-} 
-``` 
-The method configures a *Service Bus* client and defines a callback, the lambda in `Onmessage`. 
-Additionally, it creates a Service Client that will be used to call the *Direct Method* 
-implemented in the *Simulator*. 
+        var client = QueueClient.CreateFromConnectionString(serviceBusConfig.ConnectionString, 
+            serviceBusConfig.QueueName); 
+    
+        var serviceClient = ServiceClient.CreateFromConnectionString(iotHubConnectionString); 
+    
+        client.OnMessage(async message => 
+        { 
+    
+        }); 
+    } 
+    ``` 
+    The method configures a *Service Bus* client and defines a callback, the lambda in `Onmessage`. 
+    Additionally, it creates a Service Client that will be used to call the *Direct Method* 
+    implemented in the *Simulator*. 
  
 2. In the body of the `OnMessage` call, add the following code: 
- 
-```C# 
-    var status = (Status) Enum.Parse( 
-                    typeof(Status), 
-                    (string) message.Properties[MessageProperty.Status.ToString("G")]); 
-``` 
-Though the code completion benefits of using `enum`s for state representation 
-are helpful, crossing domain boundaries with them can be cause for exceptionally 
-verbose code, like the parse statement above.  Use this technique with caution; 
-for an alternate approach, check out the concept of 
-[Enumeration Classes](https://lostechies.com/jimmybogard/2008/08/12/enumeration-classes/). 
+    
+    ```C# 
+        var status = (Status) Enum.Parse( 
+                        typeof(Status), 
+                        (string) message.Properties[MessageProperty.Status.ToString("G")]); 
+    ``` 
+    Though the code completion benefits of using `enum`s for state representation 
+    are helpful, crossing domain boundaries with them can be cause for exceptionally 
+    verbose code, like the parse statement above.  Use this technique with caution; 
+    for an alternate approach, check out the concept of 
+    [Enumeration Classes](https://lostechies.com/jimmybogard/2008/08/12/enumeration-classes/). 
  
 3. Add a `switch` statement below `var status ...` to process the various message 
 *Status* cases: 
- 
-```C# 
-switch (status) 
-{ 
-    case Status.Pending: 
-        break; 
-    case Status.Rejected: 
-        break; 
-    case Status.Accepted: 
-    case Status.PreconditionFailed: 
-    default: 
-        throw new ArgumentException(); 
-} 
-``` 
- 
-We are primarily interested in messages that have a either **Pending** or **Rejected** 
-status; all others can simply result in an `ArgumentException`. 
+    
+    ```C# 
+    switch (status) 
+    { 
+        case Status.Pending: 
+            break; 
+        case Status.Rejected: 
+            break; 
+        case Status.Accepted: 
+        case Status.PreconditionFailed: 
+        default: 
+            throw new ArgumentException(); 
+    } 
+    ``` 
+    
+    We are primarily interested in messages that have a either **Pending** or **Rejected** 
+    status; all others can simply result in an `ArgumentException`. 
  
 4. For desired configuration values that failed validation, **Rejected** case,
 simply log them to the console: 
- 
-```C# 
-var body = new StreamReader(message.GetBody<Stream>()).ReadToEnd(); 
-$"Setting value was rejected by the device: '{deviceId}' with message: '{body}'. Please enter a new legal value: " 
-    .LogMessage(ConsoleColor.Red); 
-break; 
-``` 
- 
-The code reads the body of the message as a `Stream` 
+    
+    ```C# 
+    var body = new StreamReader(message.GetBody<Stream>()).ReadToEnd(); 
+    $"Setting value was rejected by the device: '{deviceId}' with message: '{body}'. Please enter a new legal value: " 
+        .LogMessage(ConsoleColor.Red); 
+    break; 
+    ``` 
+    
+    The code reads the body of the message as a `Stream` and logs an error message to the console.
  
 5. If the desired configuration passed validation then we'll use the Service Client to call a 
 direct method on the client as follows: 
- 
-```C# 
-// Send message to accept state change. 
-var method = new CloudToDeviceMethod(DeviceMethods.AcceptDesiredProperties.ToString("G"), 
-    TimeSpan.FromSeconds(30)); 
- 
-var result = await serviceClient.InvokeDeviceMethodAsync(deviceId, method, token); 
- 
-$"Device responded with result code: {result.Status} and message: {result.GetPayloadAsJson()}" 
-    .LogMessage(ConsoleColor.Green); 
-break; 
-``` 
- 
-The code creates a new `CloudToDeviceMethod` which is configured invoke the Direct Method 
-handler bound to **AcceptDesiredProperties**.  It then uses the ~Service Client` to 
-invoke the *Direct Method* and reports the result. 
- 
+    
+    ```C# 
+    // Send message to accept state change. 
+    var method = new CloudToDeviceMethod(DeviceMethods.AcceptDesiredProperties.ToString("G"), 
+        TimeSpan.FromSeconds(30)); 
+    
+    var result = await serviceClient.InvokeDeviceMethodAsync(deviceId, method, token); 
+    
+    $"Device responded with result code: {result.Status} and message: {result.GetPayloadAsJson()}" 
+        .LogMessage(ConsoleColor.Green); 
+    break; 
+    ``` 
+    
+    The code creates a new `CloudToDeviceMethod` which is configured invoke the Direct Method 
+    handler bound to **AcceptDesiredProperties**.  It then uses the ~Service Client` to 
+    invoke the *Direct Method* and reports the result. 
+    
 6. In the *Service* `Main` method, before the `consoleReadTask`, add the following code to bind the handler: 
- 
-```C# 
-CriticalNotificationMonitor(serviceBusConfig, azureConfig.ConnectionString, testDevice.DeviceId, cts.Token); 
-``` 
- 
+    
+    ```C# 
+    CriticalNotificationMonitor(serviceBusConfig, azureConfig.ConnectionString, testDevice.DeviceId, cts.Token); 
+    ``` 
+    
 ## Add Direct Method to Activate Requested Change 
  
 We need to now add, and wire up a method that can answer calls to the *AcceptDesiredProperties* 
 *Direct Method*. 
  
 1. Open the *Simulator* class and add the following method stub to the class: 
- 
-```C# 
-private static Task<MethodResponse> OnAcceptDesiredProperty(MethodRequest request, object context) 
-{ 
-    MethodResponse response; 
- 
-    if (Monitor.TryEnter(Locker) && (_propertyChangeStatus == Status.Pending)) 
+    
+    ```C# 
+    private static Task<MethodResponse> OnAcceptDesiredProperty(MethodRequest request, object context) 
     { 
-        // Locker object can be locked and property change statis is Pending. 
+        MethodResponse response; 
+    
+        if (Monitor.TryEnter(Locker) && (_propertyChangeStatus == Status.Pending)) 
+        { 
+            // Locker object can be locked and property change statis is Pending. 
+        } 
+        else 
+        { 
+            // Lock could not be obtained or property change status != Pending. 
+        } 
+        return 
+            Task.FromResult(response); 
     } 
-    else 
-    { 
-        // Lock could not be obtained or property change status != Pending. 
-    } 
-    return 
-        Task.FromResult(response); 
-} 
-``` 
- 
-This method defines a response object that well be sent back as the result of one of 
-the following cases: 
-- Lock object is available and the `_propertyChangeStatus` is set to **Pending**, 
-indicating that the configuration change request can be applied. 
-- Lock object is not available becuase a configuration change request is being executed 
-or the `_propertyChangeStatus` is set to any other value than **Pending**. 
- 
+    ``` 
+    
+    This method defines a response object that well be sent back as the result of one of 
+    the following cases: 
+    - Lock object is available and the `_propertyChangeStatus` is set to **Pending**, 
+    indicating that the configuration change request can be applied. 
+    - Lock object is not available becuase a configuration change request is being executed 
+    or the `_propertyChangeStatus` is set to any other value than **Pending**. 
+    
 2. In the second case, the `else` branch, add the following code: 
- 
-```C# 
-// Note: Precondition failed status code should really only be used with precondition headers; 
-// but Direct Methods do not allow access to headers to check precondition assertions. 
- 
-const int httpPreconditionFailedStatusCode = 412; 
- 
-var lockedResponseMessage = new 
-{ 
-    AcceptanceRequestDateTime = DateTime.UtcNow, 
-    Status = Status.PreconditionFailed.ToString("G"), 
-    Message = "A precondition for acceptance of the desired configuration change, failed." 
-}; 
- 
-response = new MethodResponse( 
-    Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(lockedResponseMessage)), 
-    httpPreconditionFailedStatusCode 
-); 
-``` 
- 
-As noted in the comments, *Direct Methods* do not expose the original cloud side 
-http request headers.  Typically, we would want the client, 
-the Service application, to make an assertion about the required state of the server, 
-the Simulator, as a precondition for fulfilment of the request. Despite not being 
-able to leverage a *Precondition header* typically associated with a 412 response, 
-will use the *Precondition Failed* response code because the server's state was 
-technically unacceptable for successful processing of the request. 
- 
-3. In the successful path, the `if` branch, add the following code: 
- 
-```C# 
-try 
-{ 
-    $"Updating message send delay from {_messageSendDelay} to {_twinDesiredProperties.MessageSendDelay}. Change will take effect immediatly." 
-        .LogMessage(ConsoleColor.Green); 
- 
-    _messageSendDelay = int.Parse(_twinDesiredProperties.MessageSendDelay); 
-    _propertyChangeStatus = Status.Accepted; 
-    var responseMessage = new 
+    
+    ```C# 
+    // Note: Precondition failed status code should really only be used with precondition headers; 
+    // but Direct Methods do not allow access to headers to check precondition assertions. 
+    
+    const int httpPreconditionFailedStatusCode = 412; 
+    
+    var lockedResponseMessage = new 
     { 
         AcceptanceRequestDateTime = DateTime.UtcNow, 
-        Status = _propertyChangeStatus, 
-        Message = "'MessageSendDelay' change accepted by device" 
+        Status = Status.PreconditionFailed.ToString("G"), 
+        Message = "A precondition for acceptance of the desired configuration change, failed." 
     }; 
+    
     response = new MethodResponse( 
-        Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(responseMessage)), 
-        (int) HttpStatusCode.OK); 
-} 
-finally 
-{ 
-    Monitor.Exit(Locker); 
-} 
-``` 
- 
-In this branch, we have acquired  a lock to safely modify both the `_propertyChangeStatus` 
-and `_messageSendDelay` fields.  Additionally we create a response message for relay 
-back to the client, indicating successful application of the desired property. Lastly, 
-we need to make sure to release the lock we acquired in the `if` statement. 
- 
-3. Now, modify the initialization task in the *Simulator.cs* to register the 
+        Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(lockedResponseMessage)), 
+        httpPreconditionFailedStatusCode 
+    ); 
+    ``` 
+    
+    As noted in the comments, *Direct Methods* do not expose the original cloud side 
+    http request headers.  Typically, we would want the client, 
+    the Service application, to make an assertion about the required state of the server, 
+    the Simulator, as a precondition for fulfilment of the request. Despite not being 
+    able to leverage a *Precondition header* typically associated with a 412 response, 
+    will use the *Precondition Failed* response code because the server's state was 
+    technically unacceptable for successful processing of the request. 
+    
+3. In the successful path, the `if` branch, add the following code: 
+    
+    ```C# 
+    try 
+    { 
+        $"Updating message send delay from {_messageSendDelay} to {_twinDesiredProperties.MessageSendDelay}. Change will take effect immediatly." 
+            .LogMessage(ConsoleColor.Green); 
+    
+        _messageSendDelay = int.Parse(_twinDesiredProperties.MessageSendDelay); 
+        _propertyChangeStatus = Status.Accepted; 
+        var responseMessage = new 
+        { 
+            AcceptanceRequestDateTime = DateTime.UtcNow, 
+            Status = _propertyChangeStatus, 
+            Message = "'MessageSendDelay' change accepted by device" 
+        }; 
+        response = new MethodResponse( 
+            Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(responseMessage)), 
+            (int) HttpStatusCode.OK); 
+    } 
+    finally 
+    { 
+        Monitor.Exit(Locker); 
+    } 
+    ``` 
+    
+    In this branch, we have acquired  a lock to safely modify both the `_propertyChangeStatus` 
+    and `_messageSendDelay` fields.  Additionally we create a response message for relay 
+    back to the client, indicating successful application of the desired property. Lastly, 
+    we need to make sure to release the lock we acquired in the `if` statement. 
+    
+4. Now, modify the initialization task in the *Simulator.cs* to register the 
 *Direct Method* handler. 
 
-```C#
- _deviceClient.SetMethodHandler("AcceptDesiredProperties", OnAcceptDesiredProperty, null);
- ```
+    ```C#
+    _deviceClient.SetMethodHandler("AcceptDesiredProperties", OnAcceptDesiredProperty, null);
+    ```
 
-The complete Task should look like the following: 
- 
-```C# 
-// execute initial connect synchronously 
-Task.Run(async () => 
-{ 
-    await Connect(_deviceClient); 
-    await GetInitialDesiredConfiguration(_deviceClient); 
- 
-    // Add Callback for Desired Configuration changes. 
-    await _deviceClient.SetDesiredPropertyUpdateCallback(OnDesiredPropertyChange, null); 
- 
-    // Add Handler to set property request 
-    _deviceClient.SetMethodHandler("AcceptDesiredProperties", OnAcceptDesiredProperty, null); 
-} 
-, cts.Token) 
-.Wait(cts.Token); 
-``` 
- 
-The `OnAcceptDesiredProperty` handler will now be called anytime the *AcceptDesiredProperties* 
-Direct Method is called. 
- 
- 
+    The complete Task should look like the following: 
+    
+    ```C# 
+    // execute initial connect synchronously 
+    Task.Run(async () => 
+    { 
+        await Connect(_deviceClient); 
+        await GetInitialDesiredConfiguration(_deviceClient); 
+    
+        // Add Callback for Desired Configuration changes. 
+        await _deviceClient.SetDesiredPropertyUpdateCallback(OnDesiredPropertyChange, null); 
+    
+        // Add Handler to set property request 
+        _deviceClient.SetMethodHandler("AcceptDesiredProperties", OnAcceptDesiredProperty, null); 
+    } 
+    , cts.Token) 
+    .Wait(cts.Token); 
+    ``` 
+    
+    The `OnAcceptDesiredProperty` handler will now be called anytime the *AcceptDesiredProperties* 
+    Direct Method is called. 
+    
+    
 ## Run Solution 
  
 1. Right Click on the Solution in the Visual Studio *Solution Explorer*, Select **Set Startup Projects ...** 
@@ -936,72 +936,72 @@ Direct Method is called.
  
 ## Extra Credit 1 - Twin Reported Configuration 
  
-- In the *Simulator* application's `OnAcceptDesiredProperty` method, make a change 
+1. In the *Simulator* application's `OnAcceptDesiredProperty` method, make a change 
 to the success branch to update the Device Twin's Reported Configuration with the 
 accepted _messageSendDelay value.  Here is some example code to work from: 
+    
+    ```C# 
+    TwinCollection reportedProperties = new TwinCollection(); 
+    reportedProperties["DateTimeLastUpdated"] = DateTime.UtcNow; 
+    
+    Client.UpdateReportedPropertiesAsync(reportedProperties); 
+    ``` 
  
-```C# 
-TwinCollection reportedProperties = new TwinCollection(); 
-reportedProperties["DateTimeLastUpdated"] = DateTime.UtcNow; 
- 
-Client.UpdateReportedPropertiesAsync(reportedProperties); 
-``` 
- 
-- In the *Service* application's `QueryTwinConfiguration` method print the device's 
+2. In the *Service* application's `QueryTwinConfiguration` method print the device's 
 reported configuration element.  In the `CriticalNotificationMonitor` method call 
 `QueryTwinConfiguration` if the `serviceClient.InvokeDeviceMethodAsync` returns an 
 HTTP status code equal to 200. 
  
 ## Extra Credit 2 - Push notifications with Flow 
  
-- Add a second Service Bus Queue to split *Pending* and *Rejected* notifications 
+1. Add a second Service Bus Queue to split *Pending* and *Rejected* notifications 
 to discrete queues.
-- Recreate the IoT Hub with a **Basic** pricing tier. 
-- Add a new *Endpoint* and *Route* to split **Pending** and **Rejected** notifications. 
-- Modify the `CriticalNotificationMonitor` method of the Service project, adding 
+2. Recreate the IoT Hub with a **Basic** pricing tier. 
+3. Add a new *Endpoint* and *Route* to split **Pending** and **Rejected** notifications. 
+4. Modify the `CriticalNotificationMonitor` method of the Service project, adding 
 discrete `OnMessage` handlers for both **Pending** and **Rejected** queues. 
-- In the **Rejected** handler add code to post the following JSON object to a URL. 
-```JAVASCRIPT 
-{ 
-    "Type":"ConfigChange", 
-    "Severity":"Critical", 
-    "Message":"this is some text" 
-} 
-``` 
-- Download the [Microsoft Flow](https://flow.microsoft.com/en-us/) application 
+5. In the **Rejected** handler add code to post the following JSON object to a URL. 
+    ```JAVASCRIPT 
+    { 
+        "Type":"ConfigChange", 
+        "Severity":"Critical", 
+        "Message":"this is some text" 
+    } 
+    ``` 
+6. Download the [Microsoft Flow](https://flow.microsoft.com/en-us/) application 
 to your phone and sign in. 
-- Go to [Microsoft Flow](https://flow.microsoft.com/en-us/) and sign in with 
+7. Go to [Microsoft Flow](https://flow.microsoft.com/en-us/) and sign in with 
 the same account used on your phone. 
     - Select *My flows* 
     - Select *Create a flow from blank* 
     - Select *Request* and enter the following JSON Schema: 
-```JAVASCRIPT 
-{ 
-  "$schema": "http://json-schema.org/draft-04/schema#", 
-  "type": "object", 
-  "properties": { 
-    "Type": { 
-      "type": "string" 
-    }, 
-    "Severity": { 
-      "type": "string" 
-    }, 
-    "Message": { 
-      "type": "string" 
-    } 
-  }, 
-  "required": [ 
-    "Type", 
-    "Severity", 
-    "Message" 
-  ] 
-} 
-``` 
-- Add a **New Step** 
-- Select **Send a push notification**, enter "Received the following critical notification: ", 
+        ```JAVASCRIPT 
+        { 
+        "$schema": "http://json-schema.org/draft-04/schema#", 
+        "type": "object", 
+        "properties": { 
+            "Type": { 
+            "type": "string" 
+            }, 
+            "Severity": { 
+            "type": "string" 
+            }, 
+            "Message": { 
+            "type": "string" 
+            } 
+        }, 
+        "required": [ 
+            "Type", 
+            "Severity", 
+            "Message" 
+        ] 
+        } 
+        ``` 
+8. Add a **New Step** 
+9. Select **Send a push notification**, enter "Received the following critical notification: ", 
 press **Add dynamic content** and Select `Message` to add the *Message* property of the JSON 
 object from the Request Body.  
-- Save the Flow, copy the generated URL in the *Request* step and use it in the *Rejected* 
+10. Save the Flow, copy the generated URL in the *Request* step and use it in the *Rejected* 
 queue flow in the Service Application. 
-- You should now receive push notifications to your phone every time a bad desired configuration 
+11. You should now receive push notifications to your phone every time a bad desired configuration 
 value is sent to the simulator. 

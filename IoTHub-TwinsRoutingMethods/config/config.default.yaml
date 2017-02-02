@@ -1,10 +1,8 @@
 AzureIoTHubConfig:
   Hostname: 
-  IotHubD2CEndpoint: messages/events
   ConnectionString: 
 DeviceConfigs:
-- Nickname: My Test Device
-  DeviceId: DeviceId
+- DeviceId: DeviceId
   Key: 
   Status: Enabled
 AzureServiceBusConfig:

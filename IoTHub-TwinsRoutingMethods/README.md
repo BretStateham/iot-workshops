@@ -515,8 +515,8 @@ Enter **Service.cs** at the prompt and allow Visual Studio to rename the class a
     
     ``` 
  
-This code parses the configuration file information and sets up the Device Registry Manager. Additionally, 
-it creates the shell of a Task to read user input from the Console. 
+    This code parses the configuration file information and sets up the Device Registry Manager. Additionally, 
+    it creates the shell of a Task to read user input from the Console. 
  
 ## Send Desired Configuration 
  

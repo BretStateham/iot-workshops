@@ -10,7 +10,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "config", "config", "{74DAB390-1F53-4B58-846A-5FF4D0F0007B}"
 	ProjectSection(SolutionItems) = preProject
 		config\config.default.yaml = config\config.default.yaml
-		config\config.yaml = config\config.yaml
 	EndProjectSection
 EndProject
 Global

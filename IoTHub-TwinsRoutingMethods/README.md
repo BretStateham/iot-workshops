@@ -167,7 +167,7 @@ in the *Name* box enter **Service**.
 in the *Solution Explorer*, and Select **Add** > **Reference**.  From the left nav, 
 select **Project** > **Solution**, and add the *Core* project. 
  
-3. Use Nuget to add the **Microsoft.Azure.Devices.Client** and **WindowsAzure.ServiceBus** 
+3. Use Nuget to add the **Microsoft.Azure.Devices** and **WindowsAzure.ServiceBus** 
 packages.  Right click on the *Simulator* project, select **Manage Nuget Packages...**. 
 In the dialog, browse for both packages, and install.  You may need to **Update** several 
 dependent packages after installation. 
@@ -175,7 +175,7 @@ dependent packages after installation.
 ### Configuration 
  
 1. Create a local config.yaml file.  In the *Solution Explorer*, open the *config* solution 
-folder.  Copy and rename *config.default.yaml* -> *config.yaml*. 
+folder.  Rename *config.default.yaml* -> *config.yaml*. 
  
 ## Creating an Azure Service Bus 
  
@@ -388,9 +388,13 @@ copy of the Device Twin's Desired Configuration.
     private static async Task GetInitialDesiredConfiguration(DeviceClient deviceClient) 
     { 
         var twin = await deviceClient.GetTwinAsync(); 
-        _twinDesiredProperties = 
-            JsonConvert.DeserializeObject<DesiredDeviceTwinConfiguration>( 
-                twin.Properties.Desired["deviceTwinConfig"].ToString()); 
+        
+        if(twin.Properties.Desired.Contains("deviceTwinConfig"))
+        {
+            _twinDesiredProperties = 
+                JsonConvert.DeserializeObject<DesiredDeviceTwinConfiguration>( 
+                    twin.Properties.Desired["deviceTwinConfig"].ToString()); 
+        }
     } 
     ``` 
     
@@ -449,8 +453,7 @@ just after the *deviceClient* is initialized as follows:
     *Note/Extra Credit:* passing a `Func<int>` to retrieve the delay value 
     on each loop would likely be prefereable to enhance testability. 
  
-9. Call the `DataSend` method from `Main` just after the *Connect* task, 
-as follows: 
+9. Create a Task below the *Connect* task to call the `DataSend` method in `Main`. 
     
     ```C# 
     Task.Run(() => DataSend(_deviceClient, cts.Token), cts.Token); 
@@ -772,7 +775,7 @@ simply log them to the console:
     
     The code reads the body of the message as a `Stream` and logs an error message to the console.
  
-5. If the desired configuration passed validation then we'll use the Service Client to call a 
+5. If the desired configuration passed validation, the **Pending** case, then we'll use the Service Client to call a 
 direct method on the client as follows: 
     
     ```C# 

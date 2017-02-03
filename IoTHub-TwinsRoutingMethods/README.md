@@ -224,7 +224,7 @@ field to the same value (`critical-notifications`).
 1. In the Azure Portal Jumpbar, click **New** > **Internet of Things** > **IoT Hub**. 
  
 2. In the *IoT Hub* blade, configure your IoT Hub, selecting the appropriate pricing tier. 
-    - In the **Name** box, enter a name for your IoT HUb. If the **Name** is valid and 
+    - In the **Name** box, enter a name for your IoT Hub. If the **Name** is valid and 
     available, a green check mark appears in the **Name** box. 
     - Select a [pricing and scale tier](https://azure.microsoft.com/en-us/pricing/details/iot-hub/). 
     This tutorial does not require a specific tier.  For this workshop, use the Free tier. 
